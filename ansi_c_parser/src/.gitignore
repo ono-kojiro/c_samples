@@ -1,0 +1,7 @@
+*.o
+lexer.c
+parser.c
+parser.h
+.deps/
+.dirstamp
+
