@@ -1,0 +1,42 @@
+# Maintainer: Kojiro ONO <ono [dot] kojiro [at] gmail [dot] com>
+_realname=dll_sample
+pkgname=mingw-w64-x86_64-${_realname}
+pkgver=0.0.1
+pkgrel=1 
+pkgdesc="DLL sample program"
+arch=('any') 
+url="https://github.com/ono-kojiro/dll_sample"
+license=("GPL")
+depends=()
+makedepends=()
+source=()
+md5sums=()
+
+prepare() {
+  rm -rf ${_realname}-${pkgver}
+  git clone ${url} ${_realname}-${pkgver}
+  cd ${srcdir}/${_realname}-${pkgver}
+}
+
+build() {
+  cd ${srcdir}/${_realname}-${pkgver}
+  autoreconf -vi
+  LDFLAGS="" \
+  sh configure \
+    --prefix=/mingw64 \
+	--host=x86_64-w64-mingw32 \
+	--target=x86_64-w64-mingw32 \
+	--build=x86_64-pc-linux-gnu \
+	--program-prefix="" \
+	--disable-static \
+	--enable-shared \
+  make
+}
+	
+package() {
+  cd $srcdir/${_realname}-${pkgver}
+  make DESTDIR="${pkgdir}" install
+}
+
+
+
