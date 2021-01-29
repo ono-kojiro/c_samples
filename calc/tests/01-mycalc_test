@@ -1,0 +1,7 @@
+#!/bin/sh
+
+MYCALC=../mycalc/mycalc
+
+echo "1+2" | $MYCALC
+
+
