@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+https://www.seimaxim.com/clients/knowledgebase/33/How-to-allow-multicast-traffic-with-FirewallD-in-RHEL-7.html
+-->
+
+<!--
+  1. copy this file to /etc/firewalld/services/
+  2. enable multicastlistener
+
+      $ firewall-cmd \-\-reload
+      $ firewall-cmd \-\-add-service=multicastlistener
+      $ firewall-cmd \-\-add-service=multicastlistener \-\-permanent
+  
+-->
+
+<service>
+  <short>My Multicast Listener</short>
+  <description>A service which allows traffic to a fictitious multicast listener.</description>
+  <port protocol="udp" port="22222"/>
+  <destination ipv4="239.255.0.1"/>
+</service>
+
