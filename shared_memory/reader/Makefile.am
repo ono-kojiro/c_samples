@@ -10,5 +10,6 @@ reader_CFLAGS = \
 	-I$(top_srcdir)/common
 
 reader_LDADD = \
-	-levent
+	-levent \
+	-lrt
 

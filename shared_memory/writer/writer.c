@@ -14,14 +14,18 @@
 #include <sys/shm.h>
 #include <sys/stat.h>
 
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
 #include "common.h"
 #include "handler.h"
-
 
 struct userdata {
 	struct event *ev;
 	const char *name;
-	const char *buf;
+	char *buf;
+	int fd_shm;
 };
 
 void sig_int_handler(int fd, short event, void *arg)
@@ -41,7 +45,6 @@ void read_stdin(int fd, short event, void *arg)
 	char c;
 
 	ev = ud->ev;
-
 
 	len = read(fd, buf, sizeof(buf) - 1);
 	if(len == -1){
@@ -63,14 +66,6 @@ void read_stdin(int fd, short event, void *arg)
 		if(!strcmp(buf, "exit")){
 			event_loopexit(NULL);
 		}
-#if 0
-		else if(!strcmp(buf, "read")){
-			fprintf(stderr, "pointer is 0x%p\n", ud);
-			fprintf(stderr, "ud->buf is 0x%p\n", ud->buf);
-			fprintf(stderr, "shared memory '%s'\n", ud->buf);
-			fprintf(stdout, "> ");
-		}
-#endif
 		else {
 			sprintf(ud->buf, "%s", buf);
 			fprintf(stdout, "> ");
@@ -89,20 +84,17 @@ int main(int argc, char **argv)
 
 	struct event io_ev;
 
+	struct event shm_evn;
+	int fd;
+	mode_t mode = S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH;
+	struct stat st;
+	unsigned char *buf;
+
 	struct option options[] = {
 		{ "version", no_argument, 0, 'v' },
 		{ "keyfile", required_argument, 0, 'k' },
 		{ 0, 0, 0, 0 }
 	};
-
-	const char *keyfile = NULL;
-	int shm_id;
-	size_t shm_size = 0x0;
-	int shm_flag = 0;
-
-	const char *shm_p = NULL;
-	const int id = 33;
-	key_t key;
 
 	struct userdata ud;
 
@@ -115,17 +107,9 @@ int main(int argc, char **argv)
 		switch(c){
 			case 'v' :
 				break;
-			case 'k' :
-				keyfile = optarg;
-				break;
 			default :
 				break;
 		}
-	}
-
-	if(!keyfile){
-		fprintf(stderr, "no keyfile option\n");
-		ret++;
 	}
 
 	if(ret){
@@ -136,49 +120,29 @@ int main(int argc, char **argv)
 	signal_set(&sig, SIGINT, sig_int_handler, NULL);
 	signal_add(&sig, NULL);
 
-#if 0
-	soc = receiver_socket(host, port, multicast_address);
-	if(soc == -1){
-		fprintf(stderr, "receiver_socket failed\n");
-		exit(1);
-	}
-
-	event_set(&ev, soc, EV_READ | EV_PERSIST, handler, &ev);
-	err = event_add(&ev, NULL);
-	if(err != 0){
-		perror("event_add failed");
-		close(soc);
-		exit(1);
-	}
-#endif
-
-	key = ftok(keyfile, id);
-	if(key == -1){
-		fprintf(stderr, "ERROR : ftok error\n");
-		exit(1);
-	}
-
-	shm_id = shmget(key, shm_size, shm_flag);
-	if(shm_id == -1){
-		fprintf(stderr, "shmget failed\n");
-		exit(1);
-	}
-	fprintf(stderr, "shm_id : %d\n", shm_id);
-	shm_p = (void *)shmat(shm_id, 0, 0);
-	if(shm_p == -1){
-		fprintf(stderr, "shmat failed\n");
-		exit(1);
-	}
-
-	sprintf(shm_p, "init");
-
 #if 1
 	setbuf(stdin, NULL);
 	setbuf(stdout, NULL);
 
-	fprintf(stderr, "shm_p is %p\n", (void *)shm_p);
+	fd = shm_open("test", O_RDWR | O_CREAT, 0755);
+	if(fd == -1){
+		fprintf(stderr, "shm_open failed\n");
+		exit(1);
+	}
+
+	ftruncate(fd, 1024);
+	fstat(fd, &st);
+	buf = mmap(NULL,
+			st.st_size,
+			PROT_READ|PROT_WRITE,
+			MAP_SHARED,
+			fd,
+			0);
+
+	ud.fd_shm = fd;
+	ud.buf = buf;
+
 	ud.ev = &io_ev;
-	ud.buf = shm_p;
 
 	event_set(&io_ev, 0 /* stdin */, EV_READ | EV_PERSIST,
 			read_stdin, (void *)&ud /* &io_ev */);
@@ -189,13 +153,8 @@ int main(int argc, char **argv)
 	event_dispatch();
 	fprintf(stderr, "END\n");
 
-	if(shm_p){
-		shmdt(shm_p);
-		shm_p = NULL;
-	}
-#if 0
-	shmctl(shm_id, IPC_RMID, NULL);
-#endif
+	close(fd);
+	shm_unlink("test");
 
 	exit(0);
 }

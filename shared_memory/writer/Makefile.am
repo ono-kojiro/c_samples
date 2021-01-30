@@ -10,5 +10,6 @@ writer_CFLAGS = \
 	-I$(top_srcdir)/common
 
 writer_LDADD = \
-	-levent
+	-levent \
+	-lrt
 
