@@ -1,0 +1,73 @@
+%{
+#include <string.h>
+#include "userdata.h"
+%}
+
+/*
+	%struct-type
+	make use of the user-defined 'struct'
+ */
+%struct-type
+
+/*
+	'-c'
+	%compare-strncmp
+	the STR argument does not need to be NUL terminated.
+ */
+
+/*
+	'-l'
+	%compare-lengths
+	the hash table performs binary comparison.
+ */
+
+/*
+	'-N'
+	%define lookup-function-name in_word_set
+	change default lookup function name
+ */
+%define lookup-function-name get_userdata
+
+/*
+	'-H'
+	%define hash-function-name declaration
+	change default hash name
+ */
+%define hash-function-name userdata_hash
+
+/*
+	'--constants-prefix'
+	%define constants-prefix userdata
+	add prefix to the constants data
+ */
+%define constants-prefix USERDATA_
+
+/*
+	'-G'
+	%global-table
+	
+ */
+%global-table
+
+/*
+	'-W'
+	%define word-array-name declaration
+ */
+%define word-array-name userdata_wordlist
+%define slot-name name
+%define initializer-suffix ,0,0
+%enum
+
+%omit-struct-type
+struct _USERDATA;
+%%
+hoge,  1, 0
+foo,  2, 0
+bar,  3, 0
+%%
+
+USERDATA *get_userdata_wordlist(int id)
+{
+	return &userdata_wordlist[id];
+}
+

@@ -1,0 +1,131 @@
+%{
+#include <stdio.h>
+#include <stdlib.h>
+#include <memory.h>
+#include <string.h>
+#include "options.h"
+%}
+
+/*
+	%struct-type
+	make use of the user-defined 'struct'
+ */
+%struct-type
+
+/*
+	'-c'
+	%compare-strncmp
+	the STR argument does not need to be NUL terminated.
+ */
+
+/*
+	'-l'
+	%compare-lengths
+	the hash table performs binary comparison.
+ */
+
+/*
+	'-N'
+	%define lookup-function-name in_word_set
+	change default lookup function name
+ */
+%define lookup-function-name get_option
+
+/*
+	'-H'
+	%define hash-function-name declaration
+	change default hash name
+ */
+%define hash-function-name option_hash
+
+/*
+	'--constants-prefix'
+	%define constants-prefix userdata
+	add prefix to the constants data
+ */
+%define constants-prefix OPTION_
+
+/*
+	'-G'
+	%global-table
+	
+ */
+%global-table
+
+/*
+	'-W'
+	%define word-array-name declaration
+ */
+%define word-array-name options_word_array
+%define slot-name name
+%define initializer-suffix ,0
+%enum
+
+%omit-struct-type
+struct _OPTION;
+%%
+help, NULL
+version, NULL
+input, NULL
+output, NULL
+%%
+
+#define LENGTH_OF_WORD_ARRAY  (sizeof(options_word_array) / sizeof(options_word_array[0]))
+
+int get_length_of_options_word_array()
+{
+	return LENGTH_OF_WORD_ARRAY;
+}
+
+int free_options()
+{
+	int i;
+	struct _OPTION *option;
+	for(i = 0; i < LENGTH_OF_WORD_ARRAY; i++){
+		option = &options_word_array[i];
+		if(option->value){
+			printf("DEBUG : free '%s' => '%s'\n", option->name, option->value);
+			free(option->value);
+			option->value = NULL;
+		}
+	}
+	
+	return 0;
+}
+
+OPTION *get_options_word_array(int id)
+{
+	return &options_word_array[id];
+}
+
+int set_option(const char *key, const char *val)
+{
+	OPTION *option = get_option(key, strlen(key));
+	
+	if(!option){
+		return 1;
+	}
+	
+	if(option->value){
+		free(option->value);
+	}
+	option->value = strdup(val);
+	return 0;
+}
+
+int print_options()
+{
+	int n, i;
+	
+	OPTION *option;
+
+	n = get_length_of_options_word_array();
+	printf("n is %d\n", n);
+	for(i = 0; i < n; i++){
+		option = get_options_word_array(i);
+		if(strlen(option->name)){
+			printf("%d : '%s' => '%s'\n", i, option->name, option->value);
+		}
+	}
+	return 0;
+}

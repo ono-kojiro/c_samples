@@ -1,0 +1,13 @@
+*.log
+config*
+config/
+Makefile
+Makefile.in
+autom4te.cache/
+aclocal.m4
+config.status
+configure
+COPYING
+INSTALL
+stamp-h1
+.deps/
