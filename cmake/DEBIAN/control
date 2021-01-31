@@ -1,0 +1,7 @@
+Package: cmake-sample
+Maintainer: Kojiro ONO <ono.kojiro@gmail.com>
+Architecture: amd64
+Version: 1.0.5
+Description: cmake sample project
+
+

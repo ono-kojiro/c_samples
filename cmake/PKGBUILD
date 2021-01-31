@@ -1,0 +1,46 @@
+#MINGW_PACKAGE_PREFIX=mingw-w64
+_realname=cmake_sample
+#pkgname="${MINGW_PACKAGE_PREFIX}-${_realname}"
+pkgname="${_realname}"
+pkgver='1.0.4'
+pkgrel='1'
+pkgdesc="cmake_sample"
+arch=('any')
+license=('GPL')
+options=('!emptydirs')
+depends=()
+#makedepends=("${MINGW_PACKAGE_PREFIX}-gcc" "${MINGW_PACKAGE_PREFIX}-check")
+url='https://github.com/ono-kojiro/cmake_sample'
+#source=('https://github.com/ono-kojiro/cmake_sample/archive/1.0.3.tar.gz')
+source=("${_realname}-${pkgver}.tar.gz")
+sha256sums=('SKIP')
+
+prepare() {
+  cd ${srcdir}/${_realname}-${pkgver}
+}
+
+build() {
+  cd ${srcdir}/${_realname}-${pkgver}
+
+  #rm -rf "build-${MINGW_CHOST}"
+  #mkdir -p "build-${MINGW_CHOST}"
+  #cd "build-${MINGW_CHOST}"
+
+  mkdir -p _cmake_make
+  cd _cmake_make
+  cmake -G "Unix Makefiles" \
+  	-DCMAKE_INSTALL_PREFIX=$pkgdir/usr \
+  	-DCMAKE_BUILD_TYPE=Release \
+  	-DBUILD_SHARED_LIBS=0 \
+  	..
+  make
+  cd ..
+
+}
+
+package() {
+  cd ${srcdir}/${_realname}-${pkgver}
+  cd _cmake_make
+  make install prefix=$pkgdir/usr
+  cd ..
+}
