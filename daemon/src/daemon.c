@@ -8,9 +8,13 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#include <syslog.h>
+
 #define RUNNING_DIR "/tmp"
 #define LOCK_FILE "daemond.lock"
 #define LOG_FILE "daemond.log"
+
+#define USE_SYSLOG 1
 
 /*
  *       daemon.c
@@ -45,10 +49,20 @@ void log_message(char *filename,char *message){
 void signal_handler(int sig){
     switch(sig){
     case SIGHUP:
+#if USE_SYSLOG
+		syslog(LOG_INFO, "Hangup Signal Catched");
+#else
         log_message(LOG_FILE,"Hangup Signal Catched");
+#endif
         break;
     case SIGTERM:
+#if USE_SYSLOG
+		syslog(LOG_INFO, "Terminate Signal Catched");
+		closelog();
+#else
         log_message(LOG_FILE,"Terminate Signal Catched");
+        closelog();
+#endif
         exit(0);
         break;
     }
@@ -57,6 +71,7 @@ void signal_handler(int sig){
 void daemonize(){
     int i,lfp;
     char str[10];
+    int ret;
 
     if(getppid() == 1)
         return;
@@ -72,11 +87,11 @@ void daemonize(){
         close(i);
 
     i = open("/dev/null",O_RDWR);
-    dup(i);
-    dup(i);
+    ret = dup(i);
+    ret = dup(i);
     umask(027);
 
-    chdir(RUNNING_DIR);
+    ret = chdir(RUNNING_DIR);
 
     lfp = open(LOCK_FILE,O_RDWR|O_CREAT,0640);
     if(lfp < 0)
@@ -85,7 +100,7 @@ void daemonize(){
         exit(1);
 
     sprintf(str,"%d\n",getpid());
-    write(lfp,str,strlen(str));
+    ret = write(lfp,str,strlen(str));
 
     signal(SIGCHLD,SIG_IGN);
     signal(SIGTSTP,SIG_IGN);
@@ -98,8 +113,14 @@ void daemonize(){
 
 int main(int argc,char **argv)
 {
+	openlog(argv[0], LOG_CONS | LOG_PID, LOG_USER);
+
+	syslog(LOG_INFO, "call daemonize()");
+
     daemonize();
     while(1)
         sleep(1);
+
+	closelog();
 }
 
