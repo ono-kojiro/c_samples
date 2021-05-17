@@ -1,0 +1,9 @@
+[Unit]
+Description=MyDaemon
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/mydaemon
+
+[Install]
+
