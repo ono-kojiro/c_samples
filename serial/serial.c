@@ -16,6 +16,8 @@
 #include <ctype.h>
 #include <locale.h>
 
+#include "baudrate.h"
+
 #define CANONICAL_MODE     1
 #define NON_CANONICAL_MODE 0
 
@@ -249,11 +251,14 @@ int main(int argc, char **argv)
 	struct option options[] = {
 		/* { "host", required_argument, 0, 'h' }, */
 		{ "port"    , required_argument, 0, 'p' },
+		{ "baudrate"    , required_argument, 0, 'b' },
 		{ 0, 0, 0, 0 }
 	};
 
 	/* const char *host = NULL; */
 	const char *port = NULL;
+	const char *baudrate_str = NULL;
+	int baudrate;
 
 	/* int soc; */
 	int fd_port;
@@ -263,7 +268,10 @@ int main(int argc, char **argv)
 	USERDATA userdata;
 
 	while(1){
-		c = getopt_long(argc, argv, "p:", options, &index);
+		c = getopt_long(
+			argc,
+			argv, "p:b:",
+			options, &index);
 		if(c == -1){
 			break;
 		}
@@ -276,6 +284,9 @@ int main(int argc, char **argv)
 			*/
 			case 'p' :
 				port = optarg;
+				break;
+			case 'b' :
+				baudrate_str = optarg;
 				break;
 			default :
 				break;
@@ -293,6 +304,18 @@ int main(int argc, char **argv)
 	if(port == NULL){
 		fprintf(stderr, "no port option\n");
 		ret++;
+	}
+
+	if(baudrate_str == NULL){
+		fprintf(stderr, "no baudrate option\n");
+		ret++;
+	}
+	else {
+		baudrate = get_baudrate_flag(baudrate_str);
+		if(baudrate == -1){
+			fprintf(stderr, "invalid baudrate, %s\n", baudrate_str);
+			ret++;
+		}
 	}
 
 	if(ret){
@@ -325,7 +348,7 @@ int main(int argc, char **argv)
 		close(fd_port);
 		exit(1);
 	}
-	set_port_attributes(fd_port, B115200, 0);
+	set_port_attributes(fd_port, baudrate, 0);
 	
 	set_blocking(fd_port, 0);
 
