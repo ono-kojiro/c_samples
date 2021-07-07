@@ -2,8 +2,8 @@ ACLOCAL_AMFLAGS = -I config
 
 SUBDIRS = \
 	tools \
-	libparser \
-	libscanner \
+	parser \
+	scanner \
 	mycalc \
 	tests
 

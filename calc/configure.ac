@@ -29,8 +29,8 @@ AC_CHECK_FUNCS([memset])
 
 AC_CONFIG_FILES([Makefile
 				 tools/Makefile
-                 libscanner/Makefile
-				 libparser/Makefile
+                 scanner/Makefile
+				 parser/Makefile
                  mycalc/Makefile
 				 tests/Makefile])
 AC_OUTPUT
