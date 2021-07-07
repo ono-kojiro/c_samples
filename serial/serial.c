@@ -18,20 +18,32 @@ typedef struct {
 
 void sig_int_handler(int fd, short event, void *arg)
 {
+	int fd_port;
+	USERDATA *userdata;
+	
+	userdata = (USERDATA *)arg;
+	fd_port = userdata->fd_port;
+			
+#if 0
 	fprintf(stdout, "\n");
 	event_loopexit(NULL);
+#else
+	fprintf(stdout, "(write ctrl+c, 0x03)\n");
+	write(fd_port, "\x03", 1);
+#endif
+
 }
 
 void stdin_handler(int fd, short event, void *arg)
 {
-	struct event *ev = arg;
 	char buf[256];
 	int len;
+	int fd_port;
 
-	USERDATA *userdata = (USERDATA *)arg;
+	USERDATA *userdata;
 
-	int fd_port = userdata->fd_port;
-
+	userdata = (USERDATA *)arg;
+	fd_port = userdata->fd_port;
 
 	len = read(fd, buf, sizeof(buf) - 1);
 	if(len == -1){
@@ -56,6 +68,8 @@ void port_handler(int fd, short event, void *arg)
 	struct event *ev = arg;
 	char buf[256];
 	int len;
+	int i;
+	char c;
 
 	len = read(fd, buf, sizeof(buf) - 1);
 	if(len == -1){
@@ -66,7 +80,19 @@ void port_handler(int fd, short event, void *arg)
 	}
 	else{
 		buf[len] = '\0';
+#if 0
+		for(i = 0; i < len; i++){
+			c = buf[i];
+			if(c < 32){
+				fprintf(stderr, "0x%02x", c);
+			}
+			else{
+				fprintf(stderr, "%c", c);
+			}
+		}
+#else
 		fprintf(stderr, "%s", buf);
+#endif
 	}
 }
 
@@ -107,6 +133,30 @@ int set_port_attributes(int fd, int speed, int parity)
 	return 0;
 }
 
+int set_stdin_attributes()
+{
+	int fd = 0; // stdin
+
+	struct termios tty;
+	if(tcgetattr(fd, &tty) != 0){
+		fprintf(stderr, "tcgetattr failed\n");
+		return -1;
+	}
+
+	tty.c_lflag &= ~ICANON; // canonical processing
+	tty.c_lflag |= ECHO;    // echo
+	tty.c_cc[VMIN]  = 0;            // read doesn't block
+	tty.c_cc[VTIME] = 5;            // 0.5 seconds read timeout
+
+	if (tcsetattr (fd, TCSANOW, &tty) != 0)
+	{
+		fprintf(stderr, "error %d from tcsetattr", errno);
+		return -1;
+	}
+	return 0;
+}
+
+
 void set_blocking (int fd, int should_block)
 {
 	struct termios tty;
@@ -130,7 +180,7 @@ int main(int argc, char **argv)
 	int c, index;
 
 	struct event ev;
-	struct event sig;
+	struct event sig_ev;
 
 	struct event io_ev;
 
@@ -188,8 +238,8 @@ int main(int argc, char **argv)
 	}
 	
 	event_init();
-	signal_set(&sig, SIGINT, sig_int_handler, NULL);
-	signal_add(&sig, NULL);
+	signal_set(&sig_ev, SIGINT, sig_int_handler, &userdata);
+	signal_add(&sig_ev, NULL);
 
 	/*
 	soc = server_socket(host, port);
@@ -212,6 +262,7 @@ int main(int argc, char **argv)
 		exit(1);
 	}
 	set_port_attributes(fd_port, B115200, 0);
+	
 	set_blocking(fd_port, 0);
 
 	userdata.fd_port = fd_port;
@@ -220,6 +271,8 @@ int main(int argc, char **argv)
 #if 1
 	setbuf(stdin, NULL);
 	setbuf(stdout, NULL);
+
+	set_stdin_attributes();
 
 	event_set(&io_ev, 0 /* stdin */, EV_READ | EV_PERSIST,
 			stdin_handler, &userdata);
