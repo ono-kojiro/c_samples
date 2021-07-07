@@ -12,6 +12,8 @@
 
 #include <termios.h>
 
+#define CANONICAL_MODE 0
+
 typedef struct {
 	int fd_port;
 } USERDATA;
@@ -24,7 +26,7 @@ void sig_int_handler(int fd, short event, void *arg)
 	userdata = (USERDATA *)arg;
 	fd_port = userdata->fd_port;
 			
-#if 0
+#if CANONICAL_MODE
 	fprintf(stdout, "\n");
 	event_loopexit(NULL);
 #else
@@ -54,12 +56,32 @@ void stdin_handler(int fd, short event, void *arg)
 		event_loopexit(NULL);
 	}
 	else{
+#if CANONICAL_MODE
 		if(!strcmp(buf, "exit")){
 			event_loopexit(NULL);
 		}
 		else {
 			write(fd_port, buf, len);
 		}
+#else
+		int i;
+		for(i = 0; i < len; i++){
+			if(buf[i] == 0x04){
+				// EOT, Ctrl+D
+				fprintf(stderr, "(Ctrl+D)\n");
+				event_loopexit(NULL);
+			}
+			if(buf[i] == 0x1b){
+				// ESC, Ctrl+[
+				fprintf(stderr, "(ESC)");
+				write(fd_port, buf + i, 1);
+			}
+			else {
+				fprintf(stderr, "0x%x", buf[i]);
+				write(fd_port, buf + i, 1);
+			}
+		}
+#endif
 	}
 }
 
@@ -272,7 +294,9 @@ int main(int argc, char **argv)
 	setbuf(stdin, NULL);
 	setbuf(stdout, NULL);
 
+#if !CANONICAL_MODE
 	set_stdin_attributes();
+#endif
 
 	event_set(&io_ev, 0 /* stdin */, EV_READ | EV_PERSIST,
 			stdin_handler, &userdata);
