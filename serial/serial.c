@@ -12,11 +12,47 @@
 
 #include <termios.h>
 
-#define CANONICAL_MODE 0
+/* for isprint() */
+#include <ctype.h>
+#include <locale.h>
+
+#define CANONICAL_MODE     1
+#define NON_CANONICAL_MODE 0
 
 typedef struct {
 	int fd_port;
+	int canonical_mode;
 } USERDATA;
+
+int set_stdin_canonical(int enabled)
+{
+	int fd = 0; // stdin
+
+	struct termios tty;
+	if(tcgetattr(fd, &tty) != 0){
+		fprintf(stderr, "tcgetattr failed\n");
+		return -1;
+	}
+
+	if(enabled){
+		tty.c_lflag |= ICANON;  // enable canonical processing
+		//tty.c_lflag &= ~ECHO;   // disable echo
+	}
+	else {
+		tty.c_lflag &= ~ICANON; // disable canonical processing
+		tty.c_lflag |= ECHO;    // echo
+	}
+	tty.c_cc[VMIN]  = 0;            // read doesn't block
+	tty.c_cc[VTIME] = 5;            // 0.5 seconds read timeout
+
+	if (tcsetattr (fd, TCSANOW, &tty) != 0)
+	{
+		fprintf(stderr, "error %d from tcsetattr", errno);
+		return -1;
+	}
+	return 0;
+}
+
 
 void sig_int_handler(int fd, short event, void *arg)
 {
@@ -25,15 +61,15 @@ void sig_int_handler(int fd, short event, void *arg)
 	
 	userdata = (USERDATA *)arg;
 	fd_port = userdata->fd_port;
-			
-#if CANONICAL_MODE
-	fprintf(stdout, "\n");
-	event_loopexit(NULL);
-#else
-	fprintf(stdout, "(write ctrl+c, 0x03)\n");
-	write(fd_port, "\x03", 1);
-#endif
-
+	
+	if(userdata->canonical_mode){		
+		fprintf(stdout, "\n");
+		event_loopexit(NULL);
+	}
+	else{
+		fprintf(stdout, "(write ctrl+c, 0x03)\n");
+		write(fd_port, "\x03", 1);
+	}
 }
 
 void stdin_handler(int fd, short event, void *arg)
@@ -41,6 +77,7 @@ void stdin_handler(int fd, short event, void *arg)
 	char buf[256];
 	int len;
 	int fd_port;
+	int i;
 
 	USERDATA *userdata;
 
@@ -56,32 +93,39 @@ void stdin_handler(int fd, short event, void *arg)
 		event_loopexit(NULL);
 	}
 	else{
-#if CANONICAL_MODE
-		if(!strcmp(buf, "exit")){
-			event_loopexit(NULL);
+		if(userdata->canonical_mode){
+			for(i = 0; i < len; i++){
+				if(buf[i] == 0x1b){
+					fprintf(stderr, "(ESC)\n");
+					write(fd_port, buf + i, 1);
+					set_stdin_canonical(0);
+					userdata->canonical_mode = 0;
+				}
+				else {
+					write(fd_port, buf + i, 1);
+				}
+			}
 		}
 		else {
-			write(fd_port, buf, len);
+			for(i = 0; i < len; i++){
+				if(buf[i] == 0x04){
+					// EOT, Ctrl+D
+					fprintf(stderr, "(Ctrl+D)\n");
+					event_loopexit(NULL);
+				}
+				if(buf[i] == 0x1b){
+					// ESC, Ctrl+[
+					fprintf(stderr, "(ESC)\n");
+					write(fd_port, buf + i, 1);
+					set_stdin_canonical(1);
+					userdata->canonical_mode = 1;
+				}
+				else {
+					//fprintf(stderr, "0x%x", buf[i]);
+					write(fd_port, buf + i, 1);
+				}
+			}
 		}
-#else
-		int i;
-		for(i = 0; i < len; i++){
-			if(buf[i] == 0x04){
-				// EOT, Ctrl+D
-				fprintf(stderr, "(Ctrl+D)\n");
-				event_loopexit(NULL);
-			}
-			if(buf[i] == 0x1b){
-				// ESC, Ctrl+[
-				fprintf(stderr, "(ESC)");
-				write(fd_port, buf + i, 1);
-			}
-			else {
-				fprintf(stderr, "0x%x", buf[i]);
-				write(fd_port, buf + i, 1);
-			}
-		}
-#endif
 	}
 }
 
@@ -102,19 +146,15 @@ void port_handler(int fd, short event, void *arg)
 	}
 	else{
 		buf[len] = '\0';
-#if 0
 		for(i = 0; i < len; i++){
 			c = buf[i];
-			if(c < 32){
-				fprintf(stderr, "0x%02x", c);
-			}
-			else{
+			if(isprint(c) || c == '\n'){
 				fprintf(stderr, "%c", c);
 			}
+			else {
+				fprintf(stderr, "(0x%02x)", c);
+			}
 		}
-#else
-		fprintf(stderr, "%s", buf);
-#endif
 	}
 }
 
@@ -258,6 +298,8 @@ int main(int argc, char **argv)
 	if(ret){
 		exit(1);
 	}
+
+	setlocale(LC_ALL, "C");
 	
 	event_init();
 	signal_set(&sig_ev, SIGINT, sig_int_handler, &userdata);
@@ -290,18 +332,14 @@ int main(int argc, char **argv)
 	userdata.fd_port = fd_port;
 
 
-#if 1
 	setbuf(stdin, NULL);
 	setbuf(stdout, NULL);
 
-#if !CANONICAL_MODE
-	set_stdin_attributes();
-#endif
+	set_stdin_canonical(0);
 
 	event_set(&io_ev, 0 /* stdin */, EV_READ | EV_PERSIST,
 			stdin_handler, &userdata);
 	event_add(&io_ev, NULL);
-#endif
 
 	event_dispatch();
 	fprintf(stderr, "END\n");
