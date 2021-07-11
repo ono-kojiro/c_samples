@@ -24,6 +24,7 @@
 typedef struct {
 	int fd_port;
 	int canonical_mode;
+	int b_echo;
 } USERDATA;
 
 int set_stdin_canonical(int enabled)
@@ -133,11 +134,14 @@ void stdin_handler(int fd, short event, void *arg)
 
 void port_handler(int fd, short event, void *arg)
 {
-	struct event *ev = arg;
 	char buf[256];
 	int len;
 	int i;
 	char c;
+
+	USERDATA *userdata;
+
+	userdata = (USERDATA *)arg;
 
 	len = read(fd, buf, sizeof(buf) - 1);
 	if(len == -1){
@@ -156,6 +160,11 @@ void port_handler(int fd, short event, void *arg)
 			else {
 				fprintf(stderr, "(0x%02x)", c);
 			}
+
+			if(userdata->b_echo){
+				write(fd, buf + i, sizeof(char));
+			}
+			
 		}
 	}
 }
@@ -252,6 +261,7 @@ int main(int argc, char **argv)
 		/* { "host", required_argument, 0, 'h' }, */
 		{ "port"    , required_argument, 0, 'p' },
 		{ "baudrate"    , required_argument, 0, 'b' },
+		{ "echo",     no_argument, 0, 'e' },
 		{ 0, 0, 0, 0 }
 	};
 
@@ -264,13 +274,16 @@ int main(int argc, char **argv)
 	int fd_port;
 
 	int err;
+	int b_echo = 0;
 
 	USERDATA userdata;
+
+	memset(&userdata, 0, sizeof(userdata));
 
 	while(1){
 		c = getopt_long(
 			argc,
-			argv, "p:b:",
+			argv, "p:b:e",
 			options, &index);
 		if(c == -1){
 			break;
@@ -288,6 +301,8 @@ int main(int argc, char **argv)
 			case 'b' :
 				baudrate_str = optarg;
 				break;
+			case 'e' :
+				userdata.b_echo = 1;
 			default :
 				break;
 		}
@@ -341,7 +356,7 @@ int main(int argc, char **argv)
 		exit(1);
 	}
 
-	event_set(&ev, fd_port, EV_READ | EV_PERSIST, port_handler, &ev);
+	event_set(&ev, fd_port, EV_READ | EV_PERSIST, port_handler, &userdata);
 	err = event_add(&ev, NULL);
 	if(err != 0){
 		perror("event_add");
