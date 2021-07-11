@@ -27,28 +27,6 @@ typedef struct {
 	int b_echo;
 } USERDATA;
 
-int set_stdin_default()
-{
-	int fd = 0; // stdin
-
-	struct termios tty;
-	if(tcgetattr(fd, &tty) != 0){
-		fprintf(stderr, "tcgetattr failed\n");
-		return -1;
-	}
-
-	tty.c_lflag |= ICANON;  // enable canonical processing
-	tty.c_lflag |= ECHO;    // echo
-
-	if (tcsetattr (fd, TCSANOW, &tty) != 0)
-	{
-		fprintf(stderr, "error %d from tcsetattr", errno);
-		return -1;
-	}
-	return 0;
-
-}
-
 int set_stdin_canonical(int enabled)
 {
 	int fd = 0; // stdin
@@ -191,7 +169,7 @@ void port_handler(int fd, short event, void *arg)
 	}
 }
 
-int set_port_attributes(int fd, int speed, int parity)
+int set_port_attributes(int fd, speed_t speed, int parity)
 {
 	struct termios tty;
 	if(tcgetattr(fd, &tty) != 0){
@@ -290,14 +268,16 @@ int main(int argc, char **argv)
 
 	/* const char *host = NULL; */
 	const char *port = NULL;
-	const char *baudrate_str = NULL;
-	int baudrate;
+	int baudrate = -1;
+	speed_t speed;
 
 	/* int soc; */
 	int fd_port;
 
 	int err;
 	int b_echo = 0;
+
+	struct termios ts, ots;
 
 	USERDATA userdata;
 
@@ -322,7 +302,7 @@ int main(int argc, char **argv)
 				port = optarg;
 				break;
 			case 'b' :
-				baudrate_str = optarg;
+				baudrate = atoi(optarg);
 				break;
 			case 'e' :
 				userdata.b_echo = 1;
@@ -344,14 +324,14 @@ int main(int argc, char **argv)
 		ret++;
 	}
 
-	if(baudrate_str == NULL){
+	if(baudrate == -1){
 		fprintf(stderr, "no baudrate option\n");
 		ret++;
 	}
 	else {
-		baudrate = get_baudrate_flag(baudrate_str);
-		if(baudrate == -1){
-			fprintf(stderr, "invalid baudrate, %s\n", baudrate_str);
+		speed = get_baudrate_flag(baudrate);
+		if(speed == -1){
+			fprintf(stderr, "invalid baudrate, %d\n", baudrate);
 			ret++;
 		}
 	}
@@ -361,6 +341,12 @@ int main(int argc, char **argv)
 	}
 
 	setlocale(LC_ALL, "C");
+
+	if(tcgetattr(STDIN_FILENO, &ts) != 0){
+		fprintf(stderr, "ERROR : %s\n", strerror(errno));
+		perror(argv[0]);
+		exit(errno);
+	}
 	
 	event_init();
 	signal_set(&sig_ev, SIGINT, sig_int_handler, &userdata);
@@ -386,7 +372,7 @@ int main(int argc, char **argv)
 		close(fd_port);
 		exit(1);
 	}
-	set_port_attributes(fd_port, baudrate, 0);
+	set_port_attributes(fd_port, speed, 0);
 	
 	set_blocking(fd_port, 0);
 
@@ -404,7 +390,13 @@ int main(int argc, char **argv)
 
 	event_dispatch();
 	fprintf(stderr, "END\n");
-	set_stdin_default();
+	
+	if(tcsetattr(STDIN_FILENO, TCSAFLUSH, &ts) != 0){
+		fprintf(stderr, "ERROR : %s\n", strerror(errno));
+		perror(argv[0]);
+		exit(errno);
+	}
+	
 	return 0;
 }
 

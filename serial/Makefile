@@ -1,24 +1,15 @@
-GPERFS = baudrate.gperf
-
-GENCODES = $(GPERFS:.gperf=.c)
-
-SRCS = serial.c $(GENCODES)
+SRCS = serial.c baudrate.c
 OBJS = $(SRCS:.c=.o)
 PROG = serial
 
 BAUDRATE = 115200
 
-all : gen obj prog
-
-gen : $(GENCODES)
+all : obj prog
 
 prog : $(PROG)
 
 $(PROG) : $(OBJS)
 	$(CC) -o $@ $(OBJS) -levent
-
-baudrate.c : baudrate.gperf
-	gperf --no-strlen --output-file=$@ $<
 
 obj : $(OBJS)
 
