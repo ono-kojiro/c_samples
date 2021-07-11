@@ -25,6 +25,7 @@ typedef struct {
 	int fd_port;
 	int canonical_mode;
 	int b_echo;
+	int debug;
 } USERDATA;
 
 int set_stdin_canonical(int enabled)
@@ -61,16 +62,21 @@ void sig_int_handler(int fd, short event, void *arg)
 {
 	int fd_port;
 	USERDATA *userdata;
+	int debug;
 	
 	userdata = (USERDATA *)arg;
 	fd_port = userdata->fd_port;
+	debug = userdata->debug;
 	
 	if(userdata->canonical_mode){		
 		fprintf(stdout, "\n");
 		event_loopexit(NULL);
 	}
 	else{
-		fprintf(stdout, "(write ctrl+c, 0x03)\n");
+		if(debug){
+			fprintf(stdout, "(write ctrl+c, 0x03)\n");
+		}
+
 		write(fd_port, "\x03", 1);
 	}
 }
@@ -82,10 +88,12 @@ void stdin_handler(int fd, short event, void *arg)
 	int fd_port;
 	int i;
 
+	int debug;
 	USERDATA *userdata;
 
 	userdata = (USERDATA *)arg;
 	fd_port = userdata->fd_port;
+	debug = userdata->debug;
 
 	len = read(fd, buf, sizeof(buf) - 1);
 	if(len == -1){
@@ -99,7 +107,9 @@ void stdin_handler(int fd, short event, void *arg)
 		if(userdata->canonical_mode){
 			for(i = 0; i < len; i++){
 				if(buf[i] == 0x1b){
-					fprintf(stderr, "(ESC)\n");
+					if(debug){
+						fprintf(stderr, "(ESC)\n");
+					}
 					write(fd_port, buf + i, 1);
 					set_stdin_canonical(0);
 					userdata->canonical_mode = 0;
@@ -113,12 +123,16 @@ void stdin_handler(int fd, short event, void *arg)
 			for(i = 0; i < len; i++){
 				if(buf[i] == 0x04){
 					// EOT, Ctrl+D
-					fprintf(stderr, "(Ctrl+D)\n");
+					if(debug){
+						fprintf(stderr, "(Ctrl+D)\n");
+					}
 					event_loopexit(NULL);
 				}
 				if(buf[i] == 0x1b){
 					// ESC, Ctrl+[
-					fprintf(stderr, "(ESC)\n");
+					if(debug){
+						fprintf(stderr, "(ESC)\n");
+					}
 					write(fd_port, buf + i, 1);
 					set_stdin_canonical(1);
 					userdata->canonical_mode = 1;
@@ -138,10 +152,13 @@ void port_handler(int fd, short event, void *arg)
 	int len;
 	int i;
 	char c;
+	int debug;
 
 	USERDATA *userdata;
 
 	userdata = (USERDATA *)arg;
+
+	debug = userdata->debug;
 
 	len = read(fd, buf, sizeof(buf) - 1);
 	if(len == -1){
@@ -158,7 +175,9 @@ void port_handler(int fd, short event, void *arg)
 				fprintf(stderr, "%c", c);
 			}
 			else {
-				fprintf(stderr, "(0x%02x)", c);
+				if(debug){
+					fprintf(stderr, "(0x%02x)", c);
+				}
 			}
 
 			if(userdata->b_echo){
@@ -263,6 +282,7 @@ int main(int argc, char **argv)
 		{ "port"    , required_argument, 0, 'p' },
 		{ "baudrate"    , required_argument, 0, 'b' },
 		{ "echo",     no_argument, 0, 'e' },
+		{ "debug",     no_argument, 0, 'd' },
 		{ 0, 0, 0, 0 }
 	};
 
@@ -286,7 +306,7 @@ int main(int argc, char **argv)
 	while(1){
 		c = getopt_long(
 			argc,
-			argv, "p:b:e",
+			argv, "p:b:ed",
 			options, &index);
 		if(c == -1){
 			break;
@@ -306,6 +326,10 @@ int main(int argc, char **argv)
 				break;
 			case 'e' :
 				userdata.b_echo = 1;
+				break;
+			case 'd' :
+				userdata.debug = 1;
+				break;
 			default :
 				break;
 		}
@@ -377,7 +401,6 @@ int main(int argc, char **argv)
 	set_blocking(fd_port, 0);
 
 	userdata.fd_port = fd_port;
-
 
 	setbuf(stdin, NULL);
 	setbuf(stdout, NULL);
