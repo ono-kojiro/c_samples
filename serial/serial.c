@@ -40,11 +40,11 @@ int set_stdin_canonical(int enabled)
 
 	if(enabled){
 		tty.c_lflag |= ICANON;  // enable canonical processing
-		tty.c_lflag |= ECHO;    // enable echo
+		tty.c_lflag |= (ECHO | ECHOE);    // enable echo
 	}
 	else {
 		tty.c_lflag &= ~ICANON; // disable canonical processing
-		tty.c_lflag &= ~ECHO;   // disable echo
+		tty.c_lflag &= ~(ECHO | ECHOE);   // disable echo
 	}
 	tty.c_cc[VMIN]  = 0;            // read doesn't block
 	tty.c_cc[VTIME] = 5;            // 0.5 seconds read timeout
@@ -87,6 +87,7 @@ void stdin_handler(int fd, short event, void *arg)
 	int len;
 	int fd_port;
 	int i;
+	char c;
 
 	int debug;
 	USERDATA *userdata;
@@ -98,49 +99,56 @@ void stdin_handler(int fd, short event, void *arg)
 	len = read(fd, buf, sizeof(buf) - 1);
 	if(len == -1){
 		perror("read error");
+		return;
 	}
-	else if(len == 0){
+
+	if(len == 0){
 		perror("closed");
 		event_loopexit(NULL);
+		return;
 	}
-	else{
-		if(userdata->canonical_mode){
-			for(i = 0; i < len; i++){
-				if(buf[i] == 0x1b){
-					if(debug){
-						fprintf(stderr, "(ESC)\n");
-					}
-					write(fd_port, buf + i, 1);
-					set_stdin_canonical(0);
-					userdata->canonical_mode = 0;
+
+	if(userdata->canonical_mode){
+		for(i = 0; i < len; i++){
+			if(buf[i] == 0x1b){
+				if(debug){
+					fprintf(stderr, "(ESC)\n");
 				}
-				else {
-					write(fd_port, buf + i, 1);
-				}
+				write(fd_port, buf + i, 1);
+				set_stdin_canonical(0);
+				userdata->canonical_mode = 0;
+			}
+			else {
+				write(fd_port, buf + i, 1);
 			}
 		}
-		else {
-			for(i = 0; i < len; i++){
-				if(buf[i] == 0x04){
-					// EOT, Ctrl+D
-					if(debug){
-						fprintf(stderr, "(Ctrl+D)\n");
-					}
-					event_loopexit(NULL);
+	}
+	else {
+		for(i = 0; i < len; i++){
+			if(buf[i] == 0x04){
+				// EOT, Ctrl+D
+				if(debug){
+					fprintf(stderr, "(Ctrl+D)\n");
 				}
-				if(buf[i] == 0x1b){
-					// ESC, Ctrl+[
-					if(debug){
-						fprintf(stderr, "(ESC)\n");
-					}
-					write(fd_port, buf + i, 1);
-					set_stdin_canonical(1);
-					userdata->canonical_mode = 1;
+				event_loopexit(NULL);
+			}
+			
+			if(buf[i] == 0x1b){
+				// ESC, Ctrl+[
+				if(debug){
+					fprintf(stderr, "(ESC)\n");
 				}
-				else {
-					//fprintf(stderr, "0x%x", buf[i]);
-					write(fd_port, buf + i, 1);
-				}
+				write(fd_port, buf + i, 1);
+				set_stdin_canonical(1);
+				userdata->canonical_mode = 1;
+			}
+			else if(buf[i] == 0x7F){
+				/* Backspace */
+				write(fd_port, buf + i, 1);
+			}
+			else {
+				//fprintf(stderr, "0x%x", buf[i]);
+				write(fd_port, buf + i, 1);
 			}
 		}
 	}
@@ -173,6 +181,14 @@ void port_handler(int fd, short event, void *arg)
 			c = buf[i];
 			if(isprint(c) || c == '\n'){
 				fprintf(stderr, "%c", c);
+			}
+			else if(c == 0x7F){
+				/* Backspace */
+				fprintf(stderr, "\b \b");
+			}
+			else if(c == 0x1B){
+				/* Delete */
+				fprintf(stderr, "\b \b");
 			}
 			else {
 				if(debug){
@@ -224,31 +240,6 @@ int set_port_attributes(int fd, speed_t speed, int parity)
 	}
 	return 0;
 }
-
-int set_stdin_attributes()
-{
-	int fd = 0; // stdin
-
-	struct termios tty;
-	if(tcgetattr(fd, &tty) != 0){
-		fprintf(stderr, "tcgetattr failed\n");
-		return -1;
-	}
-
-	tty.c_lflag &= ~ICANON; // canonical processing
-	//tty.c_lflag |= ECHO;    // echo
-	tty.c_lflag &= ~ECHO;    // echo
-	tty.c_cc[VMIN]  = 0;            // read doesn't block
-	tty.c_cc[VTIME] = 5;            // 0.5 seconds read timeout
-
-	if (tcsetattr (fd, TCSANOW, &tty) != 0)
-	{
-		fprintf(stderr, "error %d from tcsetattr", errno);
-		return -1;
-	}
-	return 0;
-}
-
 
 void set_blocking (int fd, int should_block)
 {
