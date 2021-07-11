@@ -28,11 +28,11 @@ obj : $(OBJS)
 clean :
 	rm -f $(OBJS) $(PROG)
 
-test3 :
-	./$(PROG) -p /dev/pts/3 -b $(BAUDRATE)
+server :
+	./$(PROG) -p /dev/pts/3 -b $(BAUDRATE) -e
 
-test5 :
-	./$(PROG) -p /dev/pts/5 -b $(BAUDRATE)
+client :
+	./$(PROG) -p /dev/pts/4 -b $(BAUDRATE)
 
 setup :
 	sudo apt -y install socat

@@ -27,6 +27,28 @@ typedef struct {
 	int b_echo;
 } USERDATA;
 
+int set_stdin_default()
+{
+	int fd = 0; // stdin
+
+	struct termios tty;
+	if(tcgetattr(fd, &tty) != 0){
+		fprintf(stderr, "tcgetattr failed\n");
+		return -1;
+	}
+
+	tty.c_lflag |= ICANON;  // enable canonical processing
+	tty.c_lflag |= ECHO;    // echo
+
+	if (tcsetattr (fd, TCSANOW, &tty) != 0)
+	{
+		fprintf(stderr, "error %d from tcsetattr", errno);
+		return -1;
+	}
+	return 0;
+
+}
+
 int set_stdin_canonical(int enabled)
 {
 	int fd = 0; // stdin
@@ -39,11 +61,11 @@ int set_stdin_canonical(int enabled)
 
 	if(enabled){
 		tty.c_lflag |= ICANON;  // enable canonical processing
-		//tty.c_lflag &= ~ECHO;   // disable echo
+		tty.c_lflag |= ECHO;    // enable echo
 	}
 	else {
 		tty.c_lflag &= ~ICANON; // disable canonical processing
-		tty.c_lflag |= ECHO;    // echo
+		tty.c_lflag &= ~ECHO;   // disable echo
 	}
 	tty.c_cc[VMIN]  = 0;            // read doesn't block
 	tty.c_cc[VTIME] = 5;            // 0.5 seconds read timeout
@@ -217,7 +239,8 @@ int set_stdin_attributes()
 	}
 
 	tty.c_lflag &= ~ICANON; // canonical processing
-	tty.c_lflag |= ECHO;    // echo
+	//tty.c_lflag |= ECHO;    // echo
+	tty.c_lflag &= ~ECHO;    // echo
 	tty.c_cc[VMIN]  = 0;            // read doesn't block
 	tty.c_cc[VTIME] = 5;            // 0.5 seconds read timeout
 
@@ -381,6 +404,7 @@ int main(int argc, char **argv)
 
 	event_dispatch();
 	fprintf(stderr, "END\n");
+	set_stdin_default();
 	return 0;
 }
 
