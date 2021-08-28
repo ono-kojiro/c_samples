@@ -7,15 +7,14 @@ BUILT_SOURCES = scanner.c
 myterm_SOURCES = \
 	main.c \
 	scanner.c \
-	userdata.c
+	userdata.c \
+	baudrate.c
 
 myterm_CFLAGS = \
-	-I$(top_srcdir)/common \
-	@libevent_CFLAGS@
+	@LIBEVENT_CFLAGS@
 
 myterm_LDADD = \
-	$(top_srcdir)/common/libcommon.la \
-	@libevent_LIBS@
+	@LIBEVENT_LIBS@
 
 .re.c :
 	re2c --debug-output -o $@ $<
