@@ -106,6 +106,20 @@ const char *flow_str[] = {
 #define KEY_HEX     CKEY('w') /* write hex */
 #define KEY_BREAK   CKEY('\\') /* break */
 
+#if ENABLE_DEMUX
+#define KEY_1       '1' /* mode 0x10 */
+#define KEY_2       '2' /* mode 0x20 */
+#define KEY_3       '3' /* mode 0x30 */
+#define KEY_4       '4' /* mode 0x40 */
+#define KEY_5       '5' /* mode 0x50 */
+#define KEY_6       '6' /* mode 0x60 */
+#define KEY_7       '7' /* mode 0x70 */
+#define KEY_8       '8' /* mode 0x80 */
+#define KEY_9       '9' /* mode 0x90 */
+#define KEY_0       '0' /* mode 0x00 */
+#define KEY_FF      '-' /* mode 0xFF */
+#endif
+
 /**********************************************************************/
 
 /* implemented caracter mappings */
@@ -252,7 +266,7 @@ struct {
     .raise_rts = 0,
     .raise_dtr = 0,
 #if ENABLE_DEMUX
-	.mode= 0x00,
+	.mode= 0xFF,
 #endif
     .quiet = 0
 };
@@ -1056,6 +1070,19 @@ show_keys()
               KEYC(KEY_RECEIVE));
     fd_printf(STO, "*** [C-%c] : Show port settings\r\n",
               KEYC(KEY_STATUS));
+#if ENABLE_DEMUX
+    fd_printf(STO, "*** [%c] : Mode 0x10\r\n", KEY_1);
+    fd_printf(STO, "*** [%c] : Mode 0x20\r\n", KEY_2);
+    fd_printf(STO, "*** [%c] : Mode 0x30\r\n", KEY_3);
+    fd_printf(STO, "*** [%c] : Mode 0x40\r\n", KEY_4);
+    fd_printf(STO, "*** [%c] : Mode 0x50\r\n", KEY_5);
+    fd_printf(STO, "*** [%c] : Mode 0x60\r\n", KEY_6);
+    fd_printf(STO, "*** [%c] : Mode 0x70\r\n", KEY_7);
+    fd_printf(STO, "*** [%c] : Mode 0x80\r\n", KEY_8);
+    fd_printf(STO, "*** [%c] : Mode 0x90\r\n", KEY_9);
+    fd_printf(STO, "*** [%c] : Mode 0x00\r\n", KEY_0);
+    fd_printf(STO, "*** [%c] : Mode 0xFF\r\n", KEY_FF);
+#endif
     fd_printf(STO, "*** [C-%c] : Show this message\r\n",
               KEYC(KEY_HELP));
     fd_printf(STO, "\r\n");
@@ -1231,6 +1258,41 @@ do_command (unsigned char c)
     switch (c) {
     case KEY_EXIT:
         return 1;
+#if ENABLE_DEMUX
+    case KEY_1:
+		opts.mode = 0x10;
+		break;
+    case KEY_2:
+		opts.mode = 0x20;
+		break;
+    case KEY_3:
+		opts.mode = 0x30;
+		break;
+    case KEY_4:
+		opts.mode = 0x40;
+		break;
+    case KEY_5:
+		opts.mode = 0x50;
+		break;
+    case KEY_6:
+		opts.mode = 0x60;
+		break;
+    case KEY_7:
+		opts.mode = 0x70;
+		break;
+    case KEY_8:
+		opts.mode = 0x80;
+		break;
+    case KEY_9:
+		opts.mode = 0x90;
+		break;
+    case KEY_0:
+		opts.mode = 0x00;
+		break;
+    case KEY_FF:
+		opts.mode = 0xFF;
+		break;
+#endif
     case KEY_QUIT:
         opts.noreset = 1;
         return 1;
@@ -1540,7 +1602,6 @@ loop(void)
 
 #if !ENABLE_DEMUX
             char buff_rd[TTY_RD_SZ];
-			unsigned char c;
 #endif
             char buff_map[TTY_RD_SZ * M_MAXMAP];
             /* read from port */
