@@ -51,6 +51,8 @@ int main(int argc, char **argv)
 	char ch;
 	char buf3[3];
 
+    int val;
+
 	struct event_base *evbase;
 	struct event *ev_int;
 	struct event *ev_timer;
@@ -91,6 +93,8 @@ int main(int argc, char **argv)
 		sscanf(binary, "%hhx", &bin);
 		printf("INFO : binary is 0x%x\n", bin);
 	}
+
+    srand((unsigned int)time(NULL));
 	
 
 
@@ -118,6 +122,10 @@ int main(int argc, char **argv)
 	fwrite(buf3, sizeof(char), 2, fp_out);
 #endif
 
+    buf3[0] = 0xFF;
+    buf3[1] = bin;
+    buf3[2] = 0;
+
 	for(index = optind; index < argc; index++){
 		input = argv[index];
 		fprintf(stderr, "open %s\n", input);
@@ -135,20 +143,15 @@ int main(int argc, char **argv)
 			
 			printf("LINE : %s", line);
 			for(i = 0; i < nread; i++){
-				if(bin != 0){
-					buf3[0] = 0xFF;
-					buf3[1] = bin;
-					buf3[2] = line[i];
-					nwrite = 3;
-				}
-				else {
-					buf3[0] = line[i];
-					nwrite = 1;
-				}
+                ch = line[i];
+                val = rand();
+                if(val < RAND_MAX / 3){
+				    fwrite(buf3, sizeof(char), 2, fp_out);
+                    buf3[2] = line[i];
+                }
 
-				fwrite(buf3, sizeof(char), nwrite, fp_out);
+                fwrite(&ch, sizeof(char), 1, fp_out);
 			}
-			/* fwrite(line, sizeof(char), nread, fp_out); */
 		}
 		fclose(fp_in);
 	}
