@@ -1,9 +1,9 @@
 ACLOCAL_AMFLAGS = -I config
 
 SUBDIRS = \
-	scanner \
-	reduce_path \
+	shortpath \
     tests
 
-
+test :
+	$(MAKE) -C tests check
 

@@ -6,7 +6,7 @@
 
 #include <regex.h>
 
-int reduce_path(char *path)
+int shortpath(char *path)
 {
 
     int ret;
