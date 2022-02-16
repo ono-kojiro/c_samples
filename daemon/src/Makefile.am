@@ -8,3 +8,9 @@ mydaemondir = $(sysconfdir)/systemd/system
 
 dist_pkgdata_DATA = mydaemon.service
 
+start :
+	./mydaemon
+
+stop :
+	pkill mydaemon
+
