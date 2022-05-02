@@ -1,16 +1,17 @@
-bin_PROGRAMS = mydaemon
+bin_PROGRAMS = mydaemond
 
-mydaemon_SOURCES = \
+mydaemond_SOURCES = \
 	mydaemon.c
 
-mydaemon_DATA = mydaemon.service
-mydaemondir = $(sysconfdir)/systemd/system
+mydaemond_DATA = mydaemon.service
+mydaemonddir = /lib/systemd/system
 
 dist_pkgdata_DATA = mydaemon.service
+#noinst_pkgdata_DATA = mydaemon.service
 
 start :
-	./mydaemon
+	./mydaemond
 
 stop :
-	pkill mydaemon
+	pkill mydaemond
 
