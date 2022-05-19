@@ -44,12 +44,12 @@ include(CheckLibraryExists)
 include(CheckSymbolExists)
 include(CheckTypeSize)
 
-#find_package(PkgConfig REQUIRED)
-#find_package(Threads REQUIRED)
+find_package(PkgConfig REQUIRED)
+find_package(Threads REQUIRED)
 # search libcheck
-#pkg_check_modules(LIBCHECK check REQUIRED)
-#find_package(CHECK REQUIRED)
-#include_directoreis(${CHECK_INCLUDE_DIRS})
+pkg_check_modules(LIBCHECK check REQUIRED)
+find_package(CHECK REQUIRED)
+include_directories(${CHECK_INCLUDE_DIRS})
 
 # Check headers
 set(INCLUDES "")
