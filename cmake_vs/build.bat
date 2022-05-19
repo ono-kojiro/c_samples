@@ -102,6 +102,13 @@ cmake --build _build_mingw
 GOTO :EOF
 
 REM ===============================
+REM === Test
+REM ===============================
+:TEST
+ctest --test-dir _build_mingw
+GOTO :EOF
+
+REM ===============================
 REM === Install
 REM ===============================
 :INSTALL
