@@ -1,0 +1,5 @@
+*.log
+*.trs
+check_hello
+check_test2
+
