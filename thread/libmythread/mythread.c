@@ -29,7 +29,7 @@ void *main_thread(void *arg)
     printf("argv[0] is %s\n", argv[0]);
 
     for(i = 0; i < 3; i++){
-        printf("sleep 1sec\n");
+        printf("%d : sleep 1sec\n", i);
         sleep(1);
     }
     printf("end of thread\n");

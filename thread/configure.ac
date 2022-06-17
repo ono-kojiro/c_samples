@@ -20,6 +20,9 @@ AC_PROG_CC
 # FIXME: Replace 'main' with a function in '-lpthread':
 AC_CHECK_LIB([pthread], [main])
 
+# Checks for libraries.
+PKG_CHECK_MODULES([CHECK], [check >= 0.9.4])
+
 # Checks for header files.
 AC_CHECK_HEADERS([unistd.h])
 
@@ -29,5 +32,6 @@ AC_CHECK_HEADERS([unistd.h])
 
 AC_CONFIG_FILES([Makefile
                  libmythread/Makefile
-                 mythread/Makefile])
+                 mythread/Makefile
+                 tests/Makefile])
 AC_OUTPUT
