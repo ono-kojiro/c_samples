@@ -1,0 +1,5 @@
+How to build
+ $ sh build.sh config --prefix=/
+ $ sh build.sh
+ $ sh build.sh install DESTDIR=$HOME/.local
+ 
