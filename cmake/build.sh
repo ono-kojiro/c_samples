@@ -1,17 +1,20 @@
 #!/bin/sh
 
-builddir=_cmake_make
-buildcmd=make
+top_dir="$( cd "$( dirname "$0" )" >/dev/null 2>&1 && pwd )"
+cd ${top_dir}
 
-cmake=cmake
+builddir="${top_dir}/_build"
+buildcmd="make"
 
-_usage()
+cmake="cmake"
+
+usage()
 {
 	echo "usage : $0 [options] target1 target2 ..."
 	exit 0
 }
 
-_config()
+config()
 {
 	echo config
 	mkdir -p $builddir
@@ -20,96 +23,103 @@ _config()
 			-DCMAKE_INSTALL_PREFIX=/usr \
 			-DCMAKE_INSTALL_LIBDIR=/usr/lib64 \
 			-DCMAKE_BUILD_TYPE=Release \
+            $d_options \
 			..
 }
 
-_build()
+build()
 {
 	echo build
 	cd $builddir && $buildcmd
 }
 
-_test()
+test()
 {
-	cd $builddir && $buildcmd test
-
+  cd $builddir && $buildcmd test
 }
 
-_splint()
+check()
 {
-	cd $builddir && $buildcmd splint
+  test
 }
 
-
-_install()
+splint()
 {
-	cd $builddir && $buildcmd install DESTDIR=~/tmp/cmake_sample
-
-}
-
-_dist()
-{
-	cd $builddir && $buildcmd package_source
+  cd $builddir && $buildcmd splint
 }
 
 
-_clean()
+install()
 {
-	echo clean
-	cd $builddir && $buildcmd clean
+  cd $builddir && $buildcmd install DESTDIR=$HOME/tmp/cmake_sample
 }
 
-_maintainer_clean()
+dist()
 {
-	echo maintainer-clean
-	rm -rf $builddir
+  cd $builddir && $buildcmd package_source
 }
 
+
+clean()
+{
+  echo clean
+  cd $builddir && $buildcmd clean
+}
+
+mclean()
+{
+  echo mclean
+  rm -rf $builddir
+}
+
+all()
+{
+  config
+  build
+}
 
 logfile=""
 
-while getopts hvl: option
-do
-	case "$option" in
-		h)
-			_usage;;
-		v)
-			verbose=1;;
-		l)
-			logfile=$OPTARG;;
-		*)
-			echo unknown option "$option";;
-	esac
+args=""
+
+d_options=""
+
+while [ $# -ne 0 ]; do
+  case $1 in
+    -h)
+      _usage
+      ;;
+    -v)
+      verbose=1
+      ;;
+    -l)
+      logfile=$1
+      ;;
+    -D*)
+      d_options="$d_options $1"
+      ;;
+    *)
+      args="$args $1"
+      ;;
+  esac
+
+  shift
 done
 
-shift $(($OPTIND-1))
-
-if [ "x$logfile" != "x" ]; then
-	echo logfile is $logfile
+if [ ! -z "$logfile" ]; then
+  echo logfile is $logfile
 fi
 
-for target in "$@" ; do
-	echo target is "$target"
-	if [ "x$target" = "xconfig" ]; then
-		_config
-	elif [ "x$target" = "xbuild" ]; then
-		_build
-	elif [ "x$target" = "xtest" ]; then
-		_test
-	elif [ "x$target" = "xinstall" ]; then
-		_install
-	elif [ "x$target" = "xdist" ]; then
-		_dist
-	elif [ "x$target" = "xclean" ]; then
-		_clean
-	elif [ "x$target" = "xsplint" ]; then
-		_splint
-	elif [ "x$target" = "xmaintainer-clean" ]; then
-		_maintainer_clean
-	elif [ "x$target" = "xmclean" ]; then
-		_maintainer_clean
-	else
-		echo unknown target, "$target"
-	fi
+if [ -z "$args" ]; then
+  all
+fi
+
+for target in $args; do
+  LANG=C type $target | grep 'function' > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    $target
+  else
+    make $target
+  fi
 done
 

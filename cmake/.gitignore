@@ -18,4 +18,5 @@ libtool
 *.tar.*
 .dirstamp
 _cmake_make/
+_build/
 

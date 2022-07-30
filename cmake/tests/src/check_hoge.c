@@ -1,35 +1,35 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <check.h>
-#include "hello.h"
+#include "hoge.h"
 
-START_TEST(test_hello_create)
+START_TEST(test_hoge_create)
 {
 	ck_assert_int_eq(1, 1);
 }
 END_TEST
 
-START_TEST(test_hello_zero)
+START_TEST(test_hoge_zero)
 {
 	ck_assert_msg(1 == 1, "ck_assert_msg test");
 }
 END_TEST
 
-Suite * hello_suite(void)
+Suite * hoge_suite(void)
 {
 	Suite *s;
 	TCase *tc_core;
 	TCase *tc_limits;
 
-	s = suite_create("Hello");
+	s = suite_create("Hoge");
 
 	tc_core = tcase_create("Core");
 
-	tcase_add_test(tc_core, test_hello_create);
+	tcase_add_test(tc_core, test_hoge_create);
 	suite_add_tcase(s, tc_core);
 
 	tc_limits = tcase_create("Limits");
-	tcase_add_test(tc_limits, test_hello_zero);
+	tcase_add_test(tc_limits, test_hoge_zero);
 
 	suite_add_tcase(s, tc_limits);
 
@@ -41,9 +41,9 @@ int main(int argc, char **argv)
 	int number_failed;
 	Suite *s;
 	SRunner *sr;
-	hello();
+	hoge();
 
-	s = hello_suite();
+	s = hoge_suite();
 	sr = srunner_create(s);
 
 	srunner_run_all(sr, CK_NORMAL);

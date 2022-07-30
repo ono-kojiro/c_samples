@@ -1,7 +1,7 @@
-cmake_minimum_required(VERSION 2.8)
-#cmake_minimum_required(VERSION 3.13)
+#cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.13)
 
-cmake_policy(SET CMP0048 NEW)
+#cmake_policy(SET CMP0048 NEW)
 #cmake_policy(SET CMP0076 OLD)
 
 #
@@ -27,7 +27,9 @@ set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_COLOR_MAKEFILE OFF)
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
-#set(CMAKE_C_COMPILER /usr/bin/clang CACHE PATH "$(CC)" FORCE)
+set(USE_SPLINT 1)
+
+#set(CMAKE_C_COMPILER ${HOST}-gcc CACHE PATH "$(CC)" FORCE)
 
 add_definitions("-DTOP_MACRO=1")
 
@@ -69,24 +71,25 @@ mark_as_advanced(INSTALL_LIB_DIR)
 
 add_subdirectory(libhoge ${CMAKE_CURRENT_BINARY_DIR}/libhoge)
 add_subdirectory(libfoo  ${CMAKE_CURRENT_BINARY_DIR}/libfoo)
-add_subdirectory(libhello ${CMAKE_CURRENT_BINARY_DIR}/libhello)
 add_subdirectory(hello ${CMAKE_CURRENT_BINARY_DIR}/hello)
 add_subdirectory(tests ${CMAKE_CURRENT_BINARY_DIR}/tests)
 
 set(CMAKE_VERBOSE_MAKEFILE 1)
 
-# add splint targets
-add_custom_target(splint
+if(${USE_SPLINT})
+  # add splint targets
+  add_custom_target(splint
 	COMMAND cd libhoge  && make splint-libhoge
 	COMMAND cd libfoo   && make splint-libfoo
-	COMMAND cd libhello && make splint-libhello
-	COMMAND cd hello    && make splint-hello
-)
+  	COMMAND cd hello    && make splint-hello
+  )
+endif()
+
 
 # testcase
 enable_testing()
 #add_test(test_hello test/test_hello)
-add_test(NAME check_hello COMMAND check_hello)
+add_test(NAME check_hoge COMMAND check_hoge)
 #add_test(NAME check_test2 COMMAND check_test2)
 
 # 'make package' creates tar.bz2 binary package
@@ -106,4 +109,6 @@ include(CPack)
 #foreach (_variableName ${_variableNames})
 #	message(STATUS "${_variableName}=${${_variableName}}")
 #endforeach()
+
+message("HOST is ${HOST}")
 
