@@ -1,25 +1,31 @@
 #!/bin/sh
 
-tarfile="simple_0.0.1.tar.gz"
-dscfile="simple_0.0.1.dsc"
+name="simple"
+version="0.0.1"
+
+tarfile="${name}_${version}.tar.gz"
+dscfile="${name}_${version}.dsc"
 
 sha256sum=`sha256sum $tarfile | awk '{ print $1 }'`
 md5sum=`md5sum $tarfile | awk '{ print $1 }'`
 size=`ls -l $tarfile | awk '{ print $5 }'`
 
-cat - << 'EOS' > $dscfile
+username=`git config user.name`
+email=`git config user.email`
+
+cat - << EOS > $dscfile
 Format: 3.0 (native)
-Source: simple
-Binary: simple
+Source: $name
+Binary: $name
 Architecture: any
-Version: 0.0.1
-Maintainer: Kojiro ONO <ono.kojiro@gmail.com>
-Uploaders: Kojiro ONO <ono.kojiro@gmail.com>
+Version: $version
+Maintainer: $username <$email>
+Uploaders: $username <$email>
 Homepage: http://example.com/
 Standards-Version: 4.6.0
 Testsuite: autopkgtest
 Package-List:
- simple
+ $name
 EOS
 
 {
