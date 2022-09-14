@@ -9,13 +9,16 @@ simple_SOURCES = simple.c
 SUBDIRS = tests
 
 dpkg :
-	sh genctrl.sh
+	sh mkpackage.sh ctrl --package $(PACKAGE_NAME) --version $(PACKAGE_VERSION)
 	$(MAKE) dist
-	cp -f simple-0.0.1.tar.gz simple_0.0.1.tar.gz
-	sh gendsc.sh
-	rm -rf simple-0.0.1
-	dpkg-source -x simple_0.0.1.dsc
-	cd simple-0.0.1 && dpkg-buildpackage -rfakeroot -b -us -uc
+	cp -f $(PACKAGE_NAME)-$(PACKAGE_VERSION).tar.gz \
+		$(PACKAGE_NAME)_$(PACKAGE_VERSION).tar.gz
+	sh mkpackage.sh dsc  --package $(PACKAGE_NAME) --version $(PACKAGE_VERSION)
+	
+	rm -rf $(PACKAGE_NAME)-$(PACKAGE_VERSION)
+	dpkg-source -x $(PACKAGE_NAME)_$(PACKAGE_VERSION).dsc
+	cd $(PACKAGE_NAME)-$(PACKAGE_VERSION) && \
+		dpkg-buildpackage -rfakeroot -b -us -uc
 
     
 
