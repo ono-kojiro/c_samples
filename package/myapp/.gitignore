@@ -21,4 +21,5 @@ libtool
 *~
 
 rpmbuild/
+debbuild/
 
