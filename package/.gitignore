@@ -21,3 +21,5 @@ simple-0.0.1/
 debian/
 simple
 
+rpmbuild/
+
