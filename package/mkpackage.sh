@@ -36,6 +36,7 @@ Architecture: amd64
 Version: $version
 Depends: libc6
 Description: $pkgname
+Codename: jammy
 
 EOS
 
