@@ -26,10 +26,10 @@ dpkg :
 		$(PACKAGE_NAME)_$(PACKAGE_VERSION).tar.gz
 	sh ../mkpackage.sh dsc  --package $(PACKAGE_NAME) --version $(PACKAGE_VERSION)
 	
-	rm -rf $(PACKAGE_NAME)-$(PACKAGE_VERSION)
+	rm -rf ./debbuild
 	echo "extract source ..."
-	dpkg-source -x $(PACKAGE_NAME)_$(PACKAGE_VERSION).dsc
+	dpkg-source -x $(PACKAGE_NAME)_$(PACKAGE_VERSION).dsc ./debbuild
 	echo "build package ..."
-	cd $(PACKAGE_NAME)-$(PACKAGE_VERSION) && \
+	cd debbuild && \
 		dpkg-buildpackage -rfakeroot -b -us -uc
 

@@ -20,4 +20,4 @@ configure
 libtool
 
 rpmbuild/
-
+debbuild/
