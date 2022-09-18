@@ -60,7 +60,6 @@ echo INFO : clean
 %doc
 /usr/include/mylib.h
 /usr/lib/%{name}*
-/usr/share/libmylib/LICENSE
 
 %changelog
 

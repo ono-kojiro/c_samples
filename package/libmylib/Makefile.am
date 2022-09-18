@@ -6,7 +6,7 @@ SUBDIRS = \
 
 EXTRA_DIST = libmylib.spec
 
-dist_pkgdata_DATA = LICENSE
+#dist_pkgdata_DATA = LICENSE
 
 rpm:
 	$(MAKE) dist
