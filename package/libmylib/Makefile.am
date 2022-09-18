@@ -4,7 +4,9 @@ SUBDIRS = \
   src \
   tests
 
-EXTRA_DIST = libmylib.spec
+EXTRA_DIST = \
+	debian \
+	libmylib.spec
 
 #dist_pkgdata_DATA = LICENSE
 
@@ -12,8 +14,22 @@ rpm:
 	$(MAKE) dist
 	rm -rf ./rpmbuild
 	mkdir -p ./rpmbuild/SOURCES/
-	rpmbuild --bb libmylib.spec \
+	rpmbuild --bb $(PACKAGE_NAME).spec \
 		--define "_topdir $(abs_top_srcdir)/rpmbuild" \
 		--define "_sourcedir $(abs_top_srcdir)" \
 		--target x86_64-linux-gnu
+
+dpkg :
+	sh ../mkpackage.sh ctrl --package $(PACKAGE_NAME) --version $(PACKAGE_VERSION)
+	$(MAKE) dist
+	cp -f $(PACKAGE_NAME)-$(PACKAGE_VERSION).tar.gz \
+		$(PACKAGE_NAME)_$(PACKAGE_VERSION).tar.gz
+	sh ../mkpackage.sh dsc  --package $(PACKAGE_NAME) --version $(PACKAGE_VERSION)
+	
+	rm -rf $(PACKAGE_NAME)-$(PACKAGE_VERSION)
+	echo "extract source ..."
+	dpkg-source -x $(PACKAGE_NAME)_$(PACKAGE_VERSION).dsc
+	echo "build package ..."
+	cd $(PACKAGE_NAME)-$(PACKAGE_VERSION) && \
+		dpkg-buildpackage -rfakeroot -b -us -uc
 
