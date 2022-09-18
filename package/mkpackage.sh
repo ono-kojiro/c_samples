@@ -26,7 +26,7 @@ control()
   echo generate $ctrlfile ...
 
   cat - << EOS > $ctrlfile
-Source: simple
+Source: $pkgname
 Section: utils
 Maintainer: $username <$email>
 Build-Depends: make
