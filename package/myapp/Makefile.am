@@ -1,6 +1,6 @@
 ACLOCAL_AMFLAGS = -I config
 
-SUBDIRS = src
+SUBDIRS = src tests
 
 EXTRA_DIST = \
 	debian \
