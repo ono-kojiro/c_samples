@@ -1,15 +1,11 @@
 ACLOCAL_AMFLAGS = -I config
 
-EXTRA_DIST = debian
+SUBDIRS = libmylib myapp myscript
 
-bin_PROGRAMS = simple
-
-simple_SOURCES = simple.c
-
-SUBDIRS = tests
 
 DEB_REPO_ROOT = /home/share/mydebrepo
 RPM_REPO_ROOT = /home/share/myrpmrepo
+
 
 dpkg :
 	sh mkpackage.sh ctrl --package $(PACKAGE_NAME) --version $(PACKAGE_VERSION)

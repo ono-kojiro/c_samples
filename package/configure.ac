@@ -24,4 +24,8 @@ AC_PROG_CC
 AC_CONFIG_FILES([Makefile
                  tests/Makefile])
 
+AC_CONFIG_SUBDIRS([libmylib])
+AC_CONFIG_SUBDIRS([myapp])
+AC_CONFIG_SUBDIRS([myscript])
+
 AC_OUTPUT
