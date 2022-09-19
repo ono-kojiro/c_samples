@@ -5,7 +5,7 @@ AC_PREREQ([2.69])
 AC_INIT([mydaemon], [0.0.1], [ono.kojiro@gmail.com])
 AC_CONFIG_MACRO_DIR([config])
 AC_CONFIG_AUX_DIR([config])
-AC_CONFIG_SRCDIR([src/daemon.c])
+AC_CONFIG_SRCDIR([src/mydaemon.c])
 AC_CONFIG_HEADERS([config/config.h])
 
 AM_INIT_AUTOMAKE([foreign subdir-objects])
@@ -24,5 +24,6 @@ AC_CHECK_HEADERS([fcntl.h stdlib.h string.h unistd.h])
 AC_FUNC_FORK
 
 AC_CONFIG_FILES([Makefile
+                 src/mydaemon.service
                  src/Makefile])
 AC_OUTPUT

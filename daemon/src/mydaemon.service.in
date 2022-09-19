@@ -3,7 +3,7 @@ Description=MyDaemon
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/mydaemond
+ExecStart=@prefix@/bin/mydaemond
 
 [Install]
 WantedBy=multi-user.target
