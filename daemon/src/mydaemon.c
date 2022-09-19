@@ -23,6 +23,10 @@
 
 #define MAXFD 64
 
+#include <event.h>
+#include "common.h"
+#include "accept_handler.h"
+
 void signal_handler(int sig)
 {
     switch(sig){
@@ -102,6 +106,34 @@ int daemonize(int flag)
     return 0;
 }
 
+int start_server()
+{
+	int soc;
+	int err;
+	struct event ev;
+
+	const char *host = "localhost";
+	const char *port = "9999";
+
+	event_init();
+	soc = server_socket(host, port);
+	if(soc == -1){
+	    syslog(LOG_INFO, "server_socket failed");
+		exit(1);
+	}
+
+	event_set(&ev, soc, EV_READ | EV_PERSIST, accept_handler, &ev);
+	err = event_add(&ev, NULL);
+	if(err != 0){
+	    syslog(LOG_INFO, "event_add failed");
+		close(soc);
+		exit(1);
+	}
+
+	event_dispatch();
+	return 0;
+}
+
 int main(int argc, char **argv)
 {
     char buf[PATH_MAX];
@@ -121,9 +153,12 @@ int main(int argc, char **argv)
         syslog(LOG_USER | LOG_NOTICE, "daemon:cwd=%s\n", buf);
     }
 
+	/*
     while(1){
         sleep(1);
     }
+	*/
+	start_server();
 
     closelog();
 
