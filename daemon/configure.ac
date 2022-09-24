@@ -26,4 +26,6 @@ AC_FUNC_FORK
 AC_CONFIG_FILES([Makefile
                  src/mydaemon.service
                  src/Makefile])
+AC_CONFIG_FILES([client/Makefile])
+
 AC_OUTPUT

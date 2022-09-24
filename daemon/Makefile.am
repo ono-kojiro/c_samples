@@ -1,6 +1,13 @@
 ACLOCAL_AMFLAGS = -I config
 
-SUBDIRS = src
+SUBDIRS = src \
+	client
+
+start :
+	$(MAKE) -C src start
+
+stop :
+	$(MAKE) -C src stop
 
 package :
 	$(MAKE) install DESTDIR=`pwd`/$(PACKAGE)-$(VERSION)
