@@ -13,14 +13,14 @@ int main(int argc, char **argv){
 
 	/* Parser */
 	void *parser = NULL;
-	Token t0, t1;
+	Token token, t1;
 	Token mToken;
 	char buf[256];
 
 	/* Userdata */
 	USERDATA *userdata = NULL;
 
-    int t;
+    int token_id;
     memset((char*) &in, 0, sizeof(in));
     in.fd = 0;
 
@@ -36,23 +36,23 @@ int main(int argc, char **argv){
 		exit(1);
 	}
 
-	t0.n = 0;
-	t0.value = 0;
+	token.n = 0;
+	token.value = 0;
 
 	ParseInit(parser);
 
-    while((t = scan(&in, &yylval)) != EOF){
-		fprintf(stderr, "DEBUG : %d\t%.*s\n", t, in.cur - in.tok, in.tok);
-		fprintf(stderr, "DEBUG : %d\n", t);
+    while((token_id = scan(&in, &yylval)) != EOF){
+		fprintf(stderr, "DEBUG : %d\t%.*s\n", token_id, in.cur - in.tok, in.tok);
+		fprintf(stderr, "DEBUG : %d\n", token_id);
 		fprintf(stderr, "Next\n");
 #if 1
 		sprintf(buf, "%.*s", in.cur - in.tok, in.tok);
-		t0.value = atoi(buf);
-		Parse(parser, t, t0, userdata);
+		token.value = atoi(buf);
+		Parse(parser, token_id, token, userdata);
 #endif
     }
 
-	//Parse(parser, t, t0);
+	//Parse(parser, token_id, token);
 	ParseFree(parser, free);
 	Userdata_Delete(userdata);
     close(in.fd);
