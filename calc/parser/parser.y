@@ -42,10 +42,17 @@
 	fprintf(stderr, "parsing complete!\n\n\n"); 
 }
 
+%parse_failure
+{
+	fprintf(stderr, "parsing failed!\n\n\n");
+}
+
    
 %syntax_error {  
   fprintf(stderr, "Syntax error!\n");
 }   
+
+%start_symbol main
    
 /*  This is to terminate with a new line */
 main ::= in.
