@@ -55,8 +55,13 @@ std:
 		RET(TOKEN_NUM);
 	}
 	
+	"%" {
+		RET(TOKEN_MOD);
+	}
+
+	
 	"^" {
-		RET(TOKEN_POWER);
+		RET(TOKEN_EXP);
 	}
 
 	"(" {

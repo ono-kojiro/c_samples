@@ -38,9 +38,10 @@
 %type expr {Token}
 %type NUM {Token}
 
-%left PLUS MINUS.   
-%left DIVIDE TIMES POWER.  
-   
+%left PLUS MINUS.
+%left TIMES DIVIDE MOD .
+%right EXP .
+ 
 %parse_accept
 {
 	fprintf(stderr, "parsing complete!\n\n\n"); 
@@ -85,7 +86,7 @@ expr(A) ::= expr(B) TIMES  expr(C).   { A.value = B.value * C.value;
 
                                          }  
 
-expr(A) ::= expr(B) POWER expr(C).
+expr(A) ::= expr(B) EXP expr(C).
 {
   A.value = pow(B.value, C.value);
   A.n = B.n+1  + C.n+1;
@@ -110,4 +111,10 @@ expr(A) ::= LRB expr(B) RRB .
 {
   A.value = B.value;
 }
+
+expr(A) ::= expr(B) MOD expr(C) .
+{
+  A.value = B.value % C.value;
+}
+
 
