@@ -17,8 +17,8 @@
 
   void token_destructor(Token t)
     {
-      printf("In token_destructor t.value= %d\n", t.value);
-      printf("In token_destructor t.n= %d\n", t.n);
+      fprintf(stderr, "In token_destructor t.value= %d\n", t.value);
+      fprintf(stderr, "In token_destructor t.n= %d\n", t.n);
     }
 }  
 
@@ -34,12 +34,12 @@
    
 %parse_accept
 {
-	printf("parsing complete!\n\n\n"); 
+	fprintf(stderr, "parsing complete!\n\n\n"); 
 }
 
    
 %syntax_error {  
-  printf("Syntax error!\n");
+  fprintf(stderr, "Syntax error!\n");
 }   
    
 /*  This is to terminate with a new line */
@@ -50,9 +50,8 @@ in ::= in state NEWLINE.
 
 
 state ::= expr(A).   { 
-                        printf("Result.value=%d\n", A.value);
-                        printf("Result.n=%d\n", A.n);
-
+                        fprintf(stderr, "Result.n = %d\n", A.n);
+                        printf("%d\n", A.value);
                          }  
 
 
@@ -75,7 +74,7 @@ expr(A) ::= expr(B) DIVIDE expr(C).  {
            A.value = B.value / C.value;
            A.n = B.n+1 + C.n+1;
           }else{
-           printf("divide by zero\n");
+           fprintf(stderr, "divide by zero\n");
            }
 }  /* end of DIVIDE */
 expr(A) ::= NUM(B). { A.value = B.value; A.n = B.n+1; }

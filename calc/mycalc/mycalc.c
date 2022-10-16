@@ -30,6 +30,8 @@ int main(int argc, char **argv){
 	t0.n = 0;
 	t0.value = 0;
 
+	ParseInit(parser);
+
     while((t = scan(&in, &yylval)) != EOF){
 		fprintf(stderr, "DEBUG : %d\t%.*s\n", t, in.cur - in.tok, in.tok);
 		fprintf(stderr, "DEBUG : %d\n", t);
