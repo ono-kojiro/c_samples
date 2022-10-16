@@ -17,6 +17,9 @@ int main(int argc, char **argv){
 	Token mToken;
 	char buf[256];
 
+	/* Userdata */
+	USERDATA *userdata = NULL;
+
     int t;
     memset((char*) &in, 0, sizeof(in));
     in.fd = 0;
@@ -24,6 +27,12 @@ int main(int argc, char **argv){
 	parser = (void *)ParseAlloc(malloc);
 	if(!parser){
 		fprintf(stderr, "ParseAlloc failed\n");
+		exit(1);
+	}
+
+	userdata = Userdata_Create();
+	if(!userdata){
+		fprintf(stderr, "Userdata_Create failed\n");
 		exit(1);
 	}
 
@@ -39,11 +48,12 @@ int main(int argc, char **argv){
 #if 1
 		sprintf(buf, "%.*s", in.cur - in.tok, in.tok);
 		t0.value = atoi(buf);
-		Parse(parser, t, t0);
+		Parse(parser, t, t0, userdata);
 #endif
     }
 
 	//Parse(parser, t, t0);
 	ParseFree(parser, free);
+	Userdata_Delete(userdata);
     close(in.fd);
 }

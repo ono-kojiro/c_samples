@@ -12,6 +12,9 @@
 #include <stdio.h>
 #include <assert.h>
 #include "token.h"
+
+#include "userdata.h"
+
 /* #include "parser.h" */
 
 
@@ -25,6 +28,8 @@
 %token_type {Token}
 %default_type {Token}
 %token_destructor { token_destructor($$); }
+
+%extra_argument { USERDATA *userdata }
 
 %type expr {Token}
 %type NUM {Token}

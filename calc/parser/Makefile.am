@@ -5,10 +5,11 @@ MAKEHEADERS = $(top_builddir)/tools/makeheaders
 
 BUILT_SOURCES = parser.c parser.h
 
-libparser_la_SOURCES = parser.c
+libparser_la_SOURCES = parser.c userdata.c
 
 parser.h : parser.c token.h $(MAKEHEADERS)
 	echo '#include "token.h"' > $@
+	echo '#include "userdata.h"' >> $@
 	$(MAKEHEADERS) -h $< >> $@
 
 parser.c : parser.y $(LEMON)
