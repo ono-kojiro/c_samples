@@ -55,6 +55,14 @@ std:
 		RET(TOKEN_NUM);
 	}
 
+	"(" {
+		RET(TOKEN_LRB);
+	}
+	
+	")" {
+		RET(TOKEN_RRB);
+	}
+
 	"+"	{
 		//fprintf(stderr, " ADD");
 		RET(TOKEN_PLUS);

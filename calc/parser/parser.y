@@ -94,3 +94,12 @@ expr(A) ::= expr(B) DIVIDE expr(C).  {
 }  /* end of DIVIDE */
 expr(A) ::= NUM(B). { A.value = B.value; A.n = B.n+1; }
 
+/*
+  LRB : Left Round Bracket, '('
+  RRB : Right Round Bracket, ')'
+*/
+expr(A) ::= LRB expr(B) RRB .
+{
+  A.value = B.value;
+}
+
