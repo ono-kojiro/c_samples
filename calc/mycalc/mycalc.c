@@ -40,11 +40,17 @@ int main(int argc, char **argv){
 	token.value = 0;
 
 	MyParserInit(parser);
+	MyParserTrace(stderr, "PARSER : ");
 
     while((token_id = scan(&in, &yylval)) != EOF){
-		fprintf(stderr, "DEBUG : %d\t%.*s\n", token_id, in.cur - in.tok, in.tok);
-		fprintf(stderr, "DEBUG : %d\n", token_id);
-		fprintf(stderr, "Next\n");
+		fprintf(stderr, "%s(%d) : ", __FILE__ , __LINE__ );
+		fprintf(stderr, "token(%d), ", token_id);
+		if(isprint(in.tok[0])){
+			fprintf(stderr, "'%.*s'\n", in.cur - in.tok, in.tok);
+		}
+		else {
+			fprintf(stderr, "'0x%X'\n", in.tok[0]);
+		}
 #if 1
 		sprintf(buf, "%.*s", in.cur - in.tok, in.tok);
 		token.value = atoi(buf);

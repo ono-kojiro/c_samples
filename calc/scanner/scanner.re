@@ -6,7 +6,7 @@
 #include "scanner.h"
 
 uchar *fill(Scanner *s, uchar *cursor){
-	fprintf(stderr, "fill is called\n");
+	//fprintf(stderr, "fill is called\n");
     if(!s->eof){
 	uint cnt = s->tok - s->bot;
 	if(cnt){
@@ -40,7 +40,7 @@ uchar *fill(Scanner *s, uchar *cursor){
 int scan(Scanner *s, YYSTYPE *yylval)
 {
 	uchar *cursor = s->cur;
-	fprintf(stderr, "\nscan is called\n");
+	//fprintf(stderr, "\nscan is called\n");
 std:
 	s->tok = cursor;
 
@@ -51,12 +51,12 @@ std:
 
 /*!re2c
 	INTEGER {
-		fprintf(stderr, " INTEGER");
+		//fprintf(stderr, " INTEGER");
 		RET(TOKEN_NUM);
 	}
 
 	"+"	{
-		fprintf(stderr, " ADD");
+		//fprintf(stderr, " ADD");
 		RET(TOKEN_PLUS);
 	}
 	"-" 			{ RET(TOKEN_MINUS); }
@@ -64,13 +64,13 @@ std:
 	"/"				{ RET(TOKEN_DIVIDE); }
 	
 	[ \t\v\f]+ {
-		fprintf(stderr, " WHITESPACE");
+		//fprintf(stderr, " WHITESPACE");
 		goto std;
 	}
 
 	"\r\n" | "\n"
 	{
-		fprintf(stderr, "\nNEWLINE\n");
+		//fprintf(stderr, "\nNEWLINE\n");
 		if(cursor == s->eof){
 			RET(EOF);
 		}
