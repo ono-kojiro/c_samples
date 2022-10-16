@@ -11,6 +11,7 @@
 %include {   
 #include <stdio.h>
 #include <assert.h>
+#include <math.h>
 #include "token.h"
 
 #include "userdata.h"
@@ -38,7 +39,7 @@
 %type NUM {Token}
 
 %left PLUS MINUS.   
-%left DIVIDE TIMES.  
+%left DIVIDE TIMES POWER.  
    
 %parse_accept
 {
@@ -56,7 +57,7 @@
 }   
 
 %start_symbol main
-   
+
 /*  This is to terminate with a new line */
 main ::= in.
 in ::= .
@@ -83,6 +84,13 @@ expr(A) ::= expr(B) TIMES  expr(C).   { A.value = B.value * C.value;
                                         A.n = B.n+1  + C.n+1;
 
                                          }  
+
+expr(A) ::= expr(B) POWER expr(C).
+{
+  A.value = pow(B.value, C.value);
+  A.n = B.n+1  + C.n+1;
+}
+ 
 expr(A) ::= expr(B) DIVIDE expr(C).  { 
 
          if(C.value != 0){

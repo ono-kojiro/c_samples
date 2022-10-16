@@ -10,5 +10,6 @@ mycalc_LDFLAGS =
 
 mycalc_LDADD = \
 	$(top_builddir)/scanner/libscanner.la \
-	$(top_builddir)/parser/libparser.la
+	$(top_builddir)/parser/libparser.la \
+	-lm
 

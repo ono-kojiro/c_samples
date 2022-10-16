@@ -10,7 +10,7 @@ MYCALC=../mycalc/mycalc
 
 ret=0
 
-echo 1..3
+echo 1..5
 res=$(echo "1+2" | $MYCALC)
 if [ "$res" = "3" ]; then
   echo "ok - 1+2=$res"
@@ -35,12 +35,19 @@ else
   ret=$(expr $ret + 1)
 fi
 
-#res=$(echo "(5+6)*7" | $MYCALC)
-#if [ "$res" = "210" ]; then
-#  echo "ok - (5+6)*7=$res"
-#else
-#  echo "not ok - (5+6)*7=$res"
-#fi
+res=$(echo "(5+6)*7" | $MYCALC)
+if [ "$res" = "77" ]; then
+  echo "ok - (5+6)*7=$res"
+else
+  echo "not ok - (5+6)*7=$res"
+fi
+
+res=$(echo "2^4" | $MYCALC)
+if [ "$res" = "16" ]; then
+  echo "ok - 2^4=$res"
+else
+  echo "not ok - 2^4=$res"
+fi
 
 cd $oldpwd
 

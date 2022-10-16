@@ -54,6 +54,10 @@ std:
 		//fprintf(stderr, " INTEGER");
 		RET(TOKEN_NUM);
 	}
+	
+	"^" {
+		RET(TOKEN_POWER);
+	}
 
 	"(" {
 		RET(TOKEN_LRB);

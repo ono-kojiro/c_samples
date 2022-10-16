@@ -4432,7 +4432,7 @@ void ReportTable(
     fprintf(out,"#ifndef %s%s\n", prefix, lemp->symbols[1]->name);
   }
   for(i=1; i<lemp->nterminal; i++){
-    fprintf(out,"#define %s%-30s %2d\n",prefix,lemp->symbols[i]->name,i+257);
+    fprintf(out,"#define %s%-30s %2d\n",prefix,lemp->symbols[i]->name,i);
     lineno++;
   }
   fprintf(out,"#endif\n"); lineno++;
