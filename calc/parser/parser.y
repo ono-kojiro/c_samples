@@ -25,6 +25,7 @@
     }
 }  
 
+%name MyParser
 %token_prefix TOKEN_
 
 %token_type {Token}

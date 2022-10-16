@@ -24,9 +24,9 @@ int main(int argc, char **argv){
     memset((char*) &in, 0, sizeof(in));
     in.fd = 0;
 
-	parser = (void *)ParseAlloc(malloc);
+	parser = (void *)MyParserAlloc(malloc);
 	if(!parser){
-		fprintf(stderr, "ParseAlloc failed\n");
+		fprintf(stderr, "MyParserAlloc failed\n");
 		exit(1);
 	}
 
@@ -39,7 +39,7 @@ int main(int argc, char **argv){
 	token.n = 0;
 	token.value = 0;
 
-	ParseInit(parser);
+	MyParserInit(parser);
 
     while((token_id = scan(&in, &yylval)) != EOF){
 		fprintf(stderr, "DEBUG : %d\t%.*s\n", token_id, in.cur - in.tok, in.tok);
@@ -48,12 +48,12 @@ int main(int argc, char **argv){
 #if 1
 		sprintf(buf, "%.*s", in.cur - in.tok, in.tok);
 		token.value = atoi(buf);
-		Parse(parser, token_id, token, userdata);
+		MyParser(parser, token_id, token, userdata);
 #endif
     }
 
 	//Parse(parser, token_id, token);
-	ParseFree(parser, free);
+	MyParserFree(parser, free);
 	Userdata_Delete(userdata);
     close(in.fd);
 }
