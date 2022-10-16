@@ -52,16 +52,16 @@ std:
 /*!re2c
 	INTEGER {
 		fprintf(stderr, " INTEGER");
-		RET(NUM);
+		RET(TOKEN_NUM);
 	}
 
 	"+"	{
 		fprintf(stderr, " ADD");
-		RET(PLUS);
+		RET(TOKEN_PLUS);
 	}
-	"-" 			{ RET(MINUS); }
-	"*"				{ RET(TIMES); }
-	"/"				{ RET(DIVIDE); }
+	"-" 			{ RET(TOKEN_MINUS); }
+	"*"				{ RET(TOKEN_TIMES); }
+	"/"				{ RET(TOKEN_DIVIDE); }
 	
 	[ \t\v\f]+ {
 		fprintf(stderr, " WHITESPACE");
@@ -76,7 +76,7 @@ std:
 		}
 		s->line++;
 		//s->pos = cursor; 
-		RET(NEWLINE);
+		RET(TOKEN_NEWLINE);
 
 		/* goto std; */
 	}

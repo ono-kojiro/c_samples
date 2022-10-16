@@ -25,6 +25,8 @@
     }
 }  
 
+%token_prefix TOKEN_
+
 %token_type {Token}
 %default_type {Token}
 %token_destructor { token_destructor($$); }
