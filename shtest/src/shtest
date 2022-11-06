@@ -1,0 +1,18 @@
+#!/usr/bin/env sh
+
+echo "1..1"
+
+if [ "$#" -eq 0 ]; then
+  echo "not ok - no command line"
+  exit 1
+fi
+
+cmd="$@"
+echo $cmd
+
+if [ $? -eq 0 ]; then
+  echo "ok - $cmd"
+else
+  echo "not ok - $cmd"
+fi
+
