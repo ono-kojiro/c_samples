@@ -44,7 +44,8 @@ EOS
   formatfile="debian/source/format"
   echo generate $formatfile ...
   mkdir -p "debian/source"
-  echo "3.0 (native)" > $formatfile
+  #echo "3.0 (native)" > $formatfile
+  echo "3.0 (quilt)" > $formatfile
 
   changelog="./debian/changelog"
   echo copy $changelog ...
@@ -83,18 +84,16 @@ ctrl()
 
 dsc()
 {
-  tarfile="${pkgname}_${version}.tar.gz"
+  origfile="${pkgname}_${version}.orig.tar.gz"
+  debianfile="${pkgname}_${version}.debian.tar.xz"
+
   dscfile="${pkgname}_${version}.dsc"
-
-  sha256sum=`sha256sum $tarfile | awk '{ print $1 }'`
-  md5sum=`md5sum $tarfile | awk '{ print $1 }'`
-  size=`ls -l $tarfile | awk '{ print $5 }'`
-
+  
   username=`git config user.name`
   email=`git config user.email`
 
   cat - << EOS > $dscfile
-Format: 3.0 (native)
+Format: 3.0 (quilt)
 Source: $pkgname
 Binary: $pkgname
 Architecture: any
@@ -110,10 +109,25 @@ EOS
 
   {
     echo "Checksums-Sha256:"
-    echo " $sha256sum $size $tarfile"
-    echo "Files:"
-    echo " $md5sum $size $tarfile"
+    for archive in $origfile $debianfile; do
+      sha256sum=`sha256sum $archive | awk '{ print $1 }'`
+      size=`ls -l $archive | awk '{ print $5 }'`
+
+      echo " $sha256sum $size $archive"
+    done
+
   } >> $dscfile
+
+  {  
+    echo "Files:"
+    for archive in $origfile $debianfile; do
+      md5sum=`md5sum $archive | awk '{ print $1 }'`
+      size=`ls -l $archive | awk '{ print $5 }'`
+      echo " $md5sum $size $archive"
+    done
+
+  } >> $dscfile
+
 }
 
 if [ "$#" -eq 0 ]; then

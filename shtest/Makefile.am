@@ -2,14 +2,7 @@ ACLOCAL_AMFLAGS = -I config
 
 SUBDIRS = src tests
 
-EXTRA_DIST = shtest.spec \
-debian/compat \
-debian/rules \
-debian/source \
-debian/source/format \
-debian/changelog \
-debian/control \
-mkpackage.sh
+EXTRA_DIST = shtest.spec
 
 rpm :
 	$(MAKE) dist
@@ -20,15 +13,20 @@ rpm :
         --define "_sourcedir $(abs_top_srcdir)" \
 		--target=x86_64-linux-gnu
 
-deb :
+debian :
 	sh mkpackage.sh ctrl --package $(PACKAGE_NAME) --version $(PACKAGE_VERSION)
-	$(MAKE) dist
-	cp -f $(PACKAGE_NAME)-$(PACKAGE_VERSION).tar.gz \
-		$(PACKAGE_NAME)_$(PACKAGE_VERSION).tar.gz
+	tar cJvf $(PACKAGE_NAME)_$(PACKAGE_VERSION).debian.tar.xz debian/
+
+dsc :	
 	sh mkpackage.sh dsc  --package $(PACKAGE_NAME) --version $(PACKAGE_VERSION)
-	
+
+deb :
+	$(MAKE) debian dsc
 	rm -rf $(PACKAGE_NAME)-$(PACKAGE_VERSION)
 	dpkg-source -x $(PACKAGE_NAME)_$(PACKAGE_VERSION).dsc
 	cd $(PACKAGE_NAME)-$(PACKAGE_VERSION) && \
 		dpkg-buildpackage -rfakeroot -b -us -uc
+
+.PHONY : \
+	rpm dsc debian deb
 
