@@ -19,15 +19,12 @@ debian :
 		-p $(PACKAGE_NAME) -v $(PACKAGE_VERSION)
 
 dsc :
-	$(MAKE) dist
-	mv -f \
-		$(PACKAGE_NAME)-$(PACKAGE_VERSION).tar.gz \
-		$(PACKAGE_NAME)_$(PACKAGE_VERSION).orig.tar.gz
+	$(MAKE) dist-xz distdir=$(PACKAGE_NAME)_$(PACKAGE_VERSION).orig
 	
 	sh mkpackage.sh dsc \
 		-p $(PACKAGE_NAME) -v $(PACKAGE_VERSION) \
 		-o $(PACKAGE_NAME)_$(PACKAGE_VERSION).dsc \
-		$(PACKAGE_NAME)_$(PACKAGE_VERSION).orig.tar.gz \
+		$(PACKAGE_NAME)_$(PACKAGE_VERSION).orig.tar.xz \
 		$(PACKAGE_NAME)_$(PACKAGE_VERSION).debian.tar.xz
 
 deb :

@@ -187,7 +187,7 @@ case $cmd in
 esac
 
 set +e
-LANG=C type "$cmd" | grep 'function'
+LANG=C type "$cmd" | grep 'function' > /dev/null 2>&1
 if [ "$?" -ne 0 ]; then
   echo "no such function in $0, $cmd"
   exit 1
