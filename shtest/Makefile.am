@@ -14,9 +14,9 @@ rpm :
 		--target=x86_64-linux-gnu
 
 debian :
-	sh mkpackage.sh ctrl -o debian/ -p $(PACKAGE_NAME) -v $(PACKAGE_VERSION)
-	tar cJvf $(PACKAGE_NAME)_$(PACKAGE_VERSION).debian.tar.xz debian/
-	rm -rf debian/
+	sh mkpackage.sh ctrl \
+		-o $(PACKAGE_NAME)_$(PACKAGE_VERSION).debian.tar.xz \
+		-p $(PACKAGE_NAME) -v $(PACKAGE_VERSION)
 
 dsc :
 	$(MAKE) dist
@@ -24,7 +24,11 @@ dsc :
 		$(PACKAGE_NAME)-$(PACKAGE_VERSION).tar.gz \
 		$(PACKAGE_NAME)_$(PACKAGE_VERSION).orig.tar.gz
 	
-	sh mkpackage.sh dsc  --package $(PACKAGE_NAME) --version $(PACKAGE_VERSION)
+	sh mkpackage.sh dsc \
+		-p $(PACKAGE_NAME) -v $(PACKAGE_VERSION) \
+		-o $(PACKAGE_NAME)_$(PACKAGE_VERSION).dsc \
+		$(PACKAGE_NAME)_$(PACKAGE_VERSION).orig.tar.gz \
+		$(PACKAGE_NAME)_$(PACKAGE_VERSION).debian.tar.xz
 
 deb :
 	$(MAKE) debian dsc

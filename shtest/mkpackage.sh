@@ -17,15 +17,21 @@ EOS
 
 control()
 {
+  workdir="debian"
+
+  rm -rf $workdir
+
   username=`git config user.name`
   email=`git config user.email`
 
-  if [ -z "$outdir" ]; then
-    outdir="debian"
+  if [ -z "$output" ]; then
+    echo "ERROR : no output option"
+    exit 1
   fi
-  mkdir -p $outdir
 
-  ctrlfile="$outdir/control"
+  mkdir -p $workdir
+
+  ctrlfile="$workdir/control"
   echo generate $ctrlfile ...
 
   cat - << EOS > $ctrlfile
@@ -40,21 +46,21 @@ Depends: bash
 Description: $pkgname
 EOS
 
-  compatfile="$outdir/compat"
+  compatfile="$workdir/compat"
   echo generate $compatfile ...
   echo "10" > $compatfile
 
-  formatfile="$outdir/source/format"
+  formatfile="$workdir/source/format"
   echo generate $formatfile ...
-  mkdir -p "$outdir/source"
+  mkdir -p "$workdir/source"
   #echo "3.0 (native)" > $formatfile
   echo "3.0 (quilt)" > $formatfile
 
-  changelog="$outdir/changelog"
+  changelog="$workdir/changelog"
   echo copy $changelog ...
   cp -f ChangeLog $changelog
 
-  rules="$outdir/rules"
+  rules="$workdir/rules"
   echo generate $rules ...
   cat - << 'EOS' > $rules
 #!/usr/bin/make -f
@@ -78,6 +84,23 @@ override_dh_makeshlibs:
 	dh_makeshlibs -- -c4
 EOS
 
+  case $output in
+    *.tar.xz )
+      tar cJvf $output debian/
+      ;;
+    *.tar.bz2 )
+      tar cjvf $output debian/
+      ;;
+    *.tar.gz )
+      tar czvf $output debian/
+      ;;
+    * )
+      echo "ERROR : invalid extension, $output"
+      exit 1
+      ;;
+  esac
+
+  rm -rf debian/
 }
 
 ctrl()
@@ -87,13 +110,24 @@ ctrl()
 
 dsc()
 {
-  origfile="${pkgname}_${version}.orig.tar.gz"
-  debianfile="${pkgname}_${version}.debian.tar.xz"
+  archives="$@"
+  #origfile="${pkgname}_${version}.orig.tar.gz"
+  #debianfile="${pkgname}_${version}.debian.tar.xz"
 
-  dscfile="${pkgname}_${version}.dsc"
+  if [ -z "$archives" ]; then
+    echo "ERROR : no archives"
+    exit 1
+  fi
   
   username=`git config user.name`
   email=`git config user.email`
+
+  if [ -z "$output" ]; then
+    echo "ERROR : no output option"
+    exit 1
+  fi
+
+  dscfile="$output"
 
   cat - << EOS > $dscfile
 Format: 3.0 (quilt)
@@ -112,7 +146,8 @@ EOS
 
   {
     echo "Checksums-Sha256:"
-    for archive in $origfile $debianfile; do
+    #for archive in $origfile $debianfile; do
+    for archive in $archives; do
       sha256sum=`sha256sum $archive | awk '{ print $1 }'`
       size=`ls -l $archive | awk '{ print $5 }'`
 
@@ -123,7 +158,8 @@ EOS
 
   {  
     echo "Files:"
-    for archive in $origfile $debianfile; do
+    #for archive in $origfile $debianfile; do
+    for archive in $archives; do
       md5sum=`md5sum $archive | awk '{ print $1 }'`
       size=`ls -l $archive | awk '{ print $5 }'`
       echo " $md5sum $size $archive"
@@ -150,8 +186,6 @@ case $cmd in
     ;;
 esac
 
-echo cmd is $cmd
-
 set +e
 LANG=C type "$cmd" | grep 'function'
 if [ "$?" -ne 0 ]; then
@@ -177,11 +211,12 @@ while [ "$#" -ne 0 ]; do
       shift
       pkgname=$1
       ;;
-    -o | --outdir )
+    -o | --output )
       shift
-      outdir=$1
+      output=$1
       ;;
     * )
+      break
       ;;
   esac
 
@@ -205,5 +240,5 @@ if [ "$ret" -ne 0 ]; then
 fi
 
 
-$cmd
+$cmd "$@"
 
