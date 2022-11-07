@@ -17,7 +17,12 @@ debian :
 	sh mkpackage.sh ctrl --package $(PACKAGE_NAME) --version $(PACKAGE_VERSION)
 	tar cJvf $(PACKAGE_NAME)_$(PACKAGE_VERSION).debian.tar.xz debian/
 
-dsc :	
+dsc :
+	$(MAKE) dist
+	mv -f \
+		$(PACKAGE_NAME)-$(PACKAGE_VERSION).tar.gz \
+		$(PACKAGE_NAME)_$(PACKAGE_VERSION).orig.tar.gz
+	
 	sh mkpackage.sh dsc  --package $(PACKAGE_NAME) --version $(PACKAGE_VERSION)
 
 deb :
