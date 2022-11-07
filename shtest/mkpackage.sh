@@ -32,8 +32,8 @@ Maintainer: $username <$email>
 Build-Depends: make
 
 Package: $pkgname
-Architecture: amd64
-Depends: libc6
+Architecture: all
+Depends: bash
 Description: $pkgname
 EOS
 
