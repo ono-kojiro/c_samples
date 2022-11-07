@@ -18,7 +18,7 @@ Summary: wrapper script to output TAP result
 Group: none
 License: BSD
 URL: http://example.com
-Source0: %{name}-%{version}.tar.gz
+Source0: %{name}-%{version}.tar.xz
 
 BuildArch: noarch
 

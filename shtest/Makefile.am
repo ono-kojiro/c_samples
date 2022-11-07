@@ -5,7 +5,7 @@ SUBDIRS = src tests
 EXTRA_DIST = shtest.spec
 
 rpm :
-	$(MAKE) dist
+	$(MAKE) dist-xz
 	rm -rf ./rpmbuild
 	mkdir -p ./rpmbuild
 	rpmbuild -bb shtest.spec \
