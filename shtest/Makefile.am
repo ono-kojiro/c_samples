@@ -16,6 +16,7 @@ rpm :
 debian :
 	sh mkpackage.sh ctrl --package $(PACKAGE_NAME) --version $(PACKAGE_VERSION)
 	tar cJvf $(PACKAGE_NAME)_$(PACKAGE_VERSION).debian.tar.xz debian/
+	rm -rf debian/
 
 dsc :
 	$(MAKE) dist
@@ -31,6 +32,7 @@ deb :
 	dpkg-source -x $(PACKAGE_NAME)_$(PACKAGE_VERSION).dsc
 	cd $(PACKAGE_NAME)-$(PACKAGE_VERSION) && \
 		dpkg-buildpackage -rfakeroot -b -us -uc
+	rm -rf $(PACKAGE_NAME)-$(PACKAGE_VERSION)
 
 .PHONY : \
 	rpm dsc debian deb
