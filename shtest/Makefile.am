@@ -14,7 +14,7 @@ rpm :
 		--target=x86_64-linux-gnu
 
 debian :
-	sh mkpackage.sh ctrl --package $(PACKAGE_NAME) --version $(PACKAGE_VERSION)
+	sh mkpackage.sh ctrl -o debian/ -p $(PACKAGE_NAME) -v $(PACKAGE_VERSION)
 	tar cJvf $(PACKAGE_NAME)_$(PACKAGE_VERSION).debian.tar.xz debian/
 	rm -rf debian/
 

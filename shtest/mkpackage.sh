@@ -20,9 +20,12 @@ control()
   username=`git config user.name`
   email=`git config user.email`
 
-  mkdir -p debian
+  if [ -z "$outdir" ]; then
+    outdir="debian"
+  fi
+  mkdir -p $outdir
 
-  ctrlfile="debian/control"
+  ctrlfile="$outdir/control"
   echo generate $ctrlfile ...
 
   cat - << EOS > $ctrlfile
@@ -37,21 +40,21 @@ Depends: bash
 Description: $pkgname
 EOS
 
-  compatfile="debian/compat"
+  compatfile="$outdir/compat"
   echo generate $compatfile ...
   echo "10" > $compatfile
 
-  formatfile="debian/source/format"
+  formatfile="$outdir/source/format"
   echo generate $formatfile ...
-  mkdir -p "debian/source"
+  mkdir -p "$outdir/source"
   #echo "3.0 (native)" > $formatfile
   echo "3.0 (quilt)" > $formatfile
 
-  changelog="./debian/changelog"
+  changelog="$outdir/changelog"
   echo copy $changelog ...
   cp -f ChangeLog $changelog
 
-  rules="debian/rules"
+  rules="$outdir/rules"
   echo generate $rules ...
   cat - << 'EOS' > $rules
 #!/usr/bin/make -f
@@ -173,6 +176,10 @@ while [ "$#" -ne 0 ]; do
     -p | --package )
       shift
       pkgname=$1
+      ;;
+    -o | --outdir )
+      shift
+      outdir=$1
       ;;
     * )
       ;;
