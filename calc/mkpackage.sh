@@ -31,6 +31,8 @@ control()
 
   mkdir -p $workdir
 
+  arch=$(dpkg --print-architecture)
+
   ctrlfile="$workdir/control"
   echo generate $ctrlfile ...
 
@@ -41,7 +43,7 @@ Maintainer: $username <$email>
 Build-Depends: make
 
 Package: $pkgname
-Architecture: all
+Architecture: $arch
 Depends: bash
 Description: $pkgname
 EOS
