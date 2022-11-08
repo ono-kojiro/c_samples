@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([calc], [0.0.1], [ono.kojiro@gmail.com])
+AC_INIT([mycalc], [0.0.1], [ono.kojiro@gmail.com])
 AC_CONFIG_AUX_DIR([config])
 AC_CONFIG_MACRO_DIR([config])
 AC_CONFIG_SRCDIR([mycalc/mycalc.c])
