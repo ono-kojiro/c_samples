@@ -3,6 +3,8 @@ lib_LTLIBRARIES = libparser.la
 LEMON = $(top_builddir)/tools/lemon
 MAKEHEADERS = $(top_builddir)/tools/makeheaders
 
+DIST_SOURCES = parser.y userdata.h token.h
+
 BUILT_SOURCES = parser.c parser.h
 
 libparser_la_SOURCES = parser.c userdata.c
