@@ -1,6 +1,6 @@
 noinst_PROGRAMS = makeheaders lemon
 
-DIST_SOURCES = lempar.c
+EXTRA_DIST = lempar.c
 
 makeheaders_SOURCES = makeheaders.c
 

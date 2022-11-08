@@ -1,6 +1,6 @@
 lib_LTLIBRARIES = libscanner.la
 
-DIST_SOURCES = scanner.re
+EXTRA_DIST = scanner.re scanner.h
 
 BUILT_SOURCES = scanner.c
 
