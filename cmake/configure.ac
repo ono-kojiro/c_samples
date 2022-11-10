@@ -30,7 +30,6 @@ PKG_CHECK_MODULES([CHECK], [check >= 0.9.9])
 # Checks for library functions.
 
 AC_CONFIG_FILES([Makefile
-                 libhello/Makefile
                  libhoge/Makefile
                  libfoo/Makefile
                  hello/Makefile

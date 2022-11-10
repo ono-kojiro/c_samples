@@ -10,7 +10,8 @@ include_HEADERS = \
 	./inc/hoge.h
 
 libhoge_la_CFLAGS = \
-	-I./inc
+	-I./inc \
+	-I$(top_srcdir)/libfoo/inc
 
 libhoge_la_LDFLAGS = \
 	-no-undefined \

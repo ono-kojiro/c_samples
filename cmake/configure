@@ -9012,6 +9012,10 @@ _lt_linker_boilerplate=`cat conftest.err`
 $RM -r conftest*
 
 
+## CAVEAT EMPTOR:
+## There is no encapsulation within the following macros, do not change
+## the running order or otherwise move them around unless you know exactly
+## what you are doing...
 if test -n "$compiler"; then
 
 lt_prog_compiler_no_builtin_flag=
@@ -17875,7 +17879,7 @@ fi
 
 # Checks for library functions.
 
-ac_config_files="$ac_config_files Makefile libhello/Makefile libhoge/Makefile libfoo/Makefile hello/Makefile tests/Makefile"
+ac_config_files="$ac_config_files Makefile libhoge/Makefile libfoo/Makefile hello/Makefile tests/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -18990,7 +18994,6 @@ do
     "depfiles") CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
     "libtool") CONFIG_COMMANDS="$CONFIG_COMMANDS libtool" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
-    "libhello/Makefile") CONFIG_FILES="$CONFIG_FILES libhello/Makefile" ;;
     "libhoge/Makefile") CONFIG_FILES="$CONFIG_FILES libhoge/Makefile" ;;
     "libfoo/Makefile") CONFIG_FILES="$CONFIG_FILES libfoo/Makefile" ;;
     "hello/Makefile") CONFIG_FILES="$CONFIG_FILES hello/Makefile" ;;
