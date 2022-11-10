@@ -1,18 +1,19 @@
-TESTS = check_hello check_test2
+TESTS = check_hoge check_test2
 
 check_PROGRAMS = $(TESTS)
 
-check_hello_SOURCES = \
-	./src/check_hello.c
+check_hoge_SOURCES = \
+	./src/check_hoge.c
 
-check_hello_CFLAGS = \
-	-I$(top_srcdir)/libhello/src \
+check_hoge_CFLAGS = \
+	-I$(top_srcdir)/libhoge/inc \
 	@CHECK_CFLAGS@
 
-check_hello_LDFLAGS = 
+check_hoge_LDFLAGS = 
 
-check_hello_LDADD = \
-	$(top_builddir)/libhello/libhello.la \
+check_hoge_LDADD = \
+	$(top_builddir)/libhoge/libhoge.la \
+	$(top_builddir)/libfoo/libfoo.la \
 	@CHECK_LIBS@
 
 check_test2_SOURCES = \
