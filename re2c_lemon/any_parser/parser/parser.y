@@ -61,6 +61,7 @@ lines ::= lines line EOL .
 
 line ::= wd .
 line ::= dec .
+line ::= any .
 
 line ::= line wd .
 line ::= line dec .

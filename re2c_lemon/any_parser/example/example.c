@@ -107,6 +107,9 @@ int main(int argc, char **argv)
 
 #if USE_PARSER
 		MyParserInit(parser, userdata);
+#endif
+
+#if DEBUG_PARSER
 		MyParserTrace(stderr, "PARSER : ");
 #endif
 	

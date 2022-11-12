@@ -160,10 +160,21 @@ int Scanner_Scan(SCANNER *s)
 /*!re2c
     end = "\x00";
     eol = ([\r\n]|[\n]);
-    dec = [1-9][0-9]*;
-    wd  = [a-z-A-Z]+;
     ws  = [ \t\v]+;
     any = [^];
+
+    O   = [0-7];         // oct
+    D   = [0-9];         // digit
+    NZ  = [1-9];         // non-zero
+    L   = [a-zA-Z_];     // letter
+    A   = [a-zA-Z_0-9];  // alphabet
+    H   = [a-fA-F0-9];   // hex
+    HP  = "0" [xX];      // hex prefix
+    E   = [Ee][+-]?D+;
+    P   = [Pp][+-]?D+;
+
+    wd  = (A)+;
+    dec = (D|NZ)+;
 */
 
 

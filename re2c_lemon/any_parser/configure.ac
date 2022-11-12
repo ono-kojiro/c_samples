@@ -41,7 +41,7 @@ AC_ARG_ENABLE([parser],
 		esac
 	],
 	[
-		enable_parser="no"
+		enable_parser="yes"
 	]
 )
 
@@ -77,6 +77,20 @@ AS_IF([test "x$enable_debug" = "xyes"],
 	[AC_DEFINE([DEBUG], [0], [enable debug])]
 )
 
+AC_ARG_ENABLE([debug-parser],
+	[ AS_HELP_STRING(
+			[--enable-debug-parser],
+			[enable debug in parser (default is no)])
+	],
+	[ enable_debug_parser="${enableval}" ],
+	[ enable_debug_parser="no" ]
+)
+
+AS_IF([test "x$enable_debug_parser" = "xyes"],
+	[AC_DEFINE([DEBUG_PARSER], [1], [enable debug parser])],
+	[AC_DEFINE([DEBUG_PARSER], [0], [enable debug parser])]
+)
+
 
 # Checks for header files.
 AC_CHECK_HEADERS([stdlib.h string.h])
@@ -96,4 +110,5 @@ AC_OUTPUT
 echo ""
 echo "enable_parser : $enable_parser"
 echo "enable_debug  : $enable_debug"
+echo "enable_debug_parser  : $enable_debug_parser"
 
