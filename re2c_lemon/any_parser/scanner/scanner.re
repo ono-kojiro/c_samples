@@ -172,6 +172,9 @@ int Scanner_Scan(SCANNER *s)
     HP  = "0" [xX];      // hex prefix
     E   = [Ee][+-]?D+;
     P   = [Pp][+-]?D+;
+    FS  = ("f"|"F"|"l"|"L");     // float suffix
+    IS  = ((("u"|"U")("l"|"L"|"ll"|"LL")?)|(("l"|"L"|"ll"|"LL")("u"|"U")?));
+    CP  = ("u"|"U"|"L");
 
     wd  = (A)+;
     dec = (D|NZ)+;
@@ -216,6 +219,11 @@ std:
 			end {
 				fprintf(stderr, "(EOF)\n");
 				RET(EOF);
+			}
+			
+			(HP) (H)+ (IS)? {
+				PRINT_TOKEN("I_CONSTANT");
+				RET(I_CONSTANT);
 			}
 
 			dec {

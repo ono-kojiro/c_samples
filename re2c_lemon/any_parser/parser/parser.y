@@ -62,6 +62,7 @@ lines ::= lines line EOL .
 line ::= wd .
 line ::= dec .
 line ::= any .
+line ::= i_constant .
 
 line ::= line wd .
 line ::= line dec .
@@ -70,3 +71,5 @@ line ::= line any .
 dec       ::= DEC .
 wd        ::= WD .
 any       ::= ANY .
+i_constant ::= I_CONSTANT .
+
