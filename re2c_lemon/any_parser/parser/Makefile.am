@@ -1,7 +1,9 @@
 lib_LTLIBRARIES = libparser.la
 
-LEMON = lemon
-MAKEHEADERS = makeheaders
+LEMON = $(top_builddir)/tools/lemon
+MAKEHEADERS = $(top_builddir)/tools/makeheaders
+
+LEMPAR = $(top_srcdir)/tools/lempar.c
 
 BUILT_SOURCES = parser.c parser.h
 
@@ -22,5 +24,5 @@ parser.h : parser.c token.h
 	} > $@
 
 parser.c : parser.y
-	$(LEMON) T=/usr/share/lemon/lempar.c -m -q $< || { rm -f $@; exit 1; }
+	$(LEMON) T=$(LEMPAR) -m -q $< || { rm -f $@; exit 1; }
 

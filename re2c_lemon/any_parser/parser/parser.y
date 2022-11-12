@@ -63,13 +63,22 @@ line ::= wd .
 line ::= dec .
 line ::= any .
 line ::= i_constant .
+line ::= f_constant .
+line ::= dbs .
+line ::= backslash .
 
 line ::= line wd .
 line ::= line dec .
 line ::= line any .
+line ::= line i_constant .
+line ::= line f_constant .
+line ::= line dbs .
+line ::= line backslash .
 
 dec       ::= DEC .
 wd        ::= WD .
 any       ::= ANY .
 i_constant ::= I_CONSTANT .
-
+f_constant ::= F_CONSTANT .
+backslash ::= BACKSLASH .
+dbs ::= DBS .

@@ -101,6 +101,7 @@ AC_CHECK_HEADERS([stdlib.h string.h])
 AC_CHECK_FUNCS([memset])
 
 AC_CONFIG_FILES([Makefile
+                 tools/Makefile
                  parser/Makefile
                  scanner/Makefile
                  example/Makefile

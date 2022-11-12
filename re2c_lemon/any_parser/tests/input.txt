@@ -1,11 +1,16 @@
 /* 123 abc 456 def */
 #$!
 0xABu
+Example of F_CONSTAND : 1.23
 ~ * [] qwerty # comment
 "abc def"
 This	line	contains	tab.
-45677
+45677 0123
 aaa // this is comment
-12321
+12321 '\n' '\007'
+'x063'
+'\"'
+'\?'
+\ \ \ \\ \\ \\\\\
 abcdefg hijklmn
 

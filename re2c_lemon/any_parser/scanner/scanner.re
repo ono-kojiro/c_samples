@@ -24,6 +24,19 @@
 	fprintf(stderr, ")"); \
 }
 
+int dump_scanner(SCANNER *s)
+{
+	int i;
+	fprintf(stderr, "token : '%.*s'",
+		(int)(s->cur - s->tok), s->tok);
+	fprintf(stderr, "ftell() is %d\n", s->file);
+	fprintf(stderr, "tok : 0x%" PRIXPTR "\n", (uintptr_t)s->tok);
+	fprintf(stderr, "cur : 0x%" PRIXPTR "\n", (uintptr_t)s->cur);
+	fprintf(stderr, "lim : 0x%" PRIXPTR "\n", (uintptr_t)s->lim);
+	fprintf(stderr, "eof : %d\n", s->eof);
+
+	return 0;
+}
 
 int fill(SCANNER *s, size_t need)
 {
@@ -40,15 +53,15 @@ int fill(SCANNER *s, size_t need)
 #if DEBUG
 		fprintf(stderr, "%s:%d:%s: ",
 			__FILE__ , __LINE__ , __FUNCTION__ );
-		fprintf(stderr, "ftell() is %d\n", s->file);
-		fprintf(stderr, "eof\n");
+		dump_scanner(s);
 #endif
-		fprintf(stderr, "tok : 0x%" PRIXPTR "\n", (uintptr_t)s->tok);
-		fprintf(stderr, "cur : 0x%" PRIXPTR "\n", (uintptr_t)s->cur);
-		fprintf(stderr, "lim : 0x%" PRIXPTR "\n", (uintptr_t)s->lim);
 		if(s->cur < s->lim - YYMAXFILL){
 			fprintf(stderr, "but continue\n");
 			return 1;
+		}
+		else {
+			dump_scanner(s);
+			fprintf(stderr, "s->eof\n");
 		}
         return 0;
     }
@@ -161,7 +174,6 @@ int Scanner_Scan(SCANNER *s)
     end = "\x00";
     eol = ([\r\n]|[\n]);
     ws  = [ \t\v]+;
-    any = [^];
 
     O   = [0-7];         // oct
     D   = [0-9];         // digit
@@ -176,8 +188,13 @@ int Scanner_Scan(SCANNER *s)
     IS  = ((("u"|"U")("l"|"L"|"ll"|"LL")?)|(("l"|"L"|"ll"|"LL")("u"|"U")?));
     CP  = ("u"|"U"|"L");
 
+	ES  = "\\"  ( ['"?abfnrtv] | [0-7]{1,3} );
+	BS  = "\x5C";  // backspace 0d92
+
     wd  = (A)+;
     dec = (D|NZ)+;
+
+	any = [^];
 */
 
 
@@ -216,14 +233,40 @@ std:
 				fprintf(stderr, "(EOL)\n");
 				continue;
 			}
+
 			end {
 				fprintf(stderr, "(EOF)\n");
 				RET(EOF);
+			}
+
+			BS {
+				PRINT_TOKEN("BACKSLASH");
+				RET(BACKSLASH);
+			}
+
+			CP? "'" ([^']|ES|BS)+ "'" {
+				PRINT_TOKEN("I_CONSTANT");
+				RET(I_CONSTANT);
 			}
 			
 			(HP) (H)+ (IS)? {
 				PRINT_TOKEN("I_CONSTANT");
 				RET(I_CONSTANT);
+			}
+
+			NZ D* IS? {
+				PRINT_TOKEN("I_CONSTANT");
+				RET(I_CONSTANT);
+			}
+
+			"0" D* IS? {
+				PRINT_TOKEN("I_CONSTANT");
+				RET(I_CONSTANT);
+			}
+
+			D* "." D+ E? FS? {
+				PRINT_TOKEN("F_CONSTANT");
+				RET(F_CONSTANT);
 			}
 
 			dec {
@@ -246,7 +289,7 @@ std:
 				PRINT_TOKEN("ANY");
 				RET(ANY);
 			}
-
+			
 			* {
 				fprintf(stderr, "(UNKNOWN:%X)", s->tok[0]);
 				RET(-1);
