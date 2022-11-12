@@ -1,7 +1,8 @@
 ACLOCAL_AMFLAGS = -I config
 
-SUBDIRS = linux
+SUBDIRS = \
+	linux \
+	tests
 
-test :
-	cd linux && $(MAKE) $@
+test : check
 

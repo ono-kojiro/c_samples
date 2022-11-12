@@ -23,7 +23,6 @@ WS  [ \t\v\n\f]
 
 %{
 #include <stdio.h>
-/* #include "y.tab.h" */
 #include "parser.h"
 
 extern void yyerror(const char *);  /* prints grammar violation message */
@@ -37,8 +36,8 @@ static int check_type(void);
 %}
 
 %%
-"/*"									{ comment(); }
-"//".*									{ /* consume //-comment */ }
+"/*"                                    { comment(); }
+"//".*                                    { /* consume //-comment */ }
 
 "auto"					{ return(AUTO); }
 "break"					{ return(BREAK); }
@@ -74,17 +73,17 @@ static int check_type(void);
 "void"					{ return(VOID); }
 "volatile"				{ return(VOLATILE); }
 "while"					{ return(WHILE); }
-"_Alignas"							  { return ALIGNAS; }
-"_Alignof"							  { return ALIGNOF; }
-"_Atomic"							   { return ATOMIC; }
-"_Bool"								 { return BOOL; }
-"_Complex"							  { return COMPLEX; }
-"_Generic"							  { return GENERIC; }
-"_Imaginary"							{ return IMAGINARY; }
-"_Noreturn"							 { return NORETURN; }
-"_Static_assert"						{ return STATIC_ASSERT; }
-"_Thread_local"						 { return THREAD_LOCAL; }
-"__func__"							  { return FUNC_NAME; }
+"_Alignas"                              { return ALIGNAS; }
+"_Alignof"                              { return ALIGNOF; }
+"_Atomic"                               { return ATOMIC; }
+"_Bool"                                 { return BOOL; }
+"_Complex"                              { return COMPLEX; }
+"_Generic"                              { return GENERIC; }
+"_Imaginary"                            { return IMAGINARY; }
+"_Noreturn"                             { return NORETURN; }
+"_Static_assert"                        { return STATIC_ASSERT; }
+"_Thread_local"                         { return THREAD_LOCAL; }
+"__func__"                              { return FUNC_NAME; }
 
 {L}{A}*					{ return check_type(); }
 
@@ -154,39 +153,39 @@ static int check_type(void);
 
 %%
 
-int yywrap(void)		/* called at end of input */
+int yywrap(void)        /* called at end of input */
 {
-	return 1;		   /* terminate now */
+    return 1;           /* terminate now */
 }
 
 static void comment(void)
 {
-	int c;
+    int c;
 
-	while ((c = input()) != 0)
-		if (c == '*')
-		{
-			while ((c = input()) == '*')
-				;
+    while ((c = input()) != 0)
+        if (c == '*')
+        {
+            while ((c = input()) == '*')
+                ;
 
-			if (c == '/')
-				return;
+            if (c == '/')
+                return;
 
-			if (c == 0)
-				break;
-		}
-	yyerror("unterminated comment");
+            if (c == 0)
+                break;
+        }
+    yyerror("unterminated comment");
 }
 
 static int check_type(void)
 {
-	switch (sym_type(yytext))
-	{
-	case TYPEDEF_NAME:				/* previously defined */
-		return TYPEDEF_NAME;
-	case ENUMERATION_CONSTANT:		/* previously defined */
-		return ENUMERATION_CONSTANT;
-	default:						  /* includes undefined */
-		return IDENTIFIER;
-	}
+    switch (sym_type(yytext))
+    {
+    case TYPEDEF_NAME:                /* previously defined */
+        return TYPEDEF_NAME;
+    case ENUMERATION_CONSTANT:        /* previously defined */
+        return ENUMERATION_CONSTANT;
+    default:                          /* includes undefined */
+        return IDENTIFIER;
+    }
 }

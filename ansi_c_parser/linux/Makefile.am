@@ -25,9 +25,3 @@ c99_LDADD =
 ../src/parser.c : ../src/parser.y
 	$(PARSER) $(AM_YFLAGS) -o $@ $<
 
-test :
-	./c99 < test.c
-
-
-
-

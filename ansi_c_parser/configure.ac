@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([FULL-PACKAGE-NAME], [VERSION], [BUG-REPORT-ADDRESS])
+AC_INIT([ansi_c_parser], [0.0.1], [ono.kojiro@gmail.com])
 AC_CONFIG_MACRO_DIR([config])
 AC_CONFIG_AUX_DIR([config])
 AC_CONFIG_SRCDIR([src/lexer.l])
@@ -15,16 +15,20 @@ AC_PROG_CC
 AC_PROG_CC_C_O
 
 AC_PROG_YACC
-AC_PROG_LEX
+AC_PROG_LEX([noyywrap])
 
 # Checks for libraries.
 
 # Checks for header files.
+AC_FUNC_MALLOC
+AC_FUNC_ALLOCA
+AC_CHECK_HEADERS([libintl.h malloc.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 
 # Checks for library functions.
 
 AC_CONFIG_FILES([Makefile
-                 linux/Makefile])
+                 linux/Makefile
+                 tests/Makefile])
 AC_OUTPUT

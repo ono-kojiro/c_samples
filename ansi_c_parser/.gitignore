@@ -8,4 +8,7 @@ config.status
 configure
 COPYING
 INSTALL
+*.trs
+*.scan
+*~
 
