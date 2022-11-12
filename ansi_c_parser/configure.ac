@@ -5,10 +5,12 @@ AC_PREREQ([2.69])
 AC_INIT([ansi_c_parser], [0.0.1], [ono.kojiro@gmail.com])
 AC_CONFIG_MACRO_DIR([config])
 AC_CONFIG_AUX_DIR([config])
-AC_CONFIG_SRCDIR([src/lexer.l])
+AC_CONFIG_SRCDIR([lexer/lexer.l])
 AC_CONFIG_HEADERS([config/config.h])
 
 AM_INIT_AUTOMAKE([foreign subdir-objects])
+
+LT_INIT
 
 # Checks for programs.
 AC_PROG_CC
@@ -29,6 +31,8 @@ AC_CHECK_HEADERS([libintl.h malloc.h])
 # Checks for library functions.
 
 AC_CONFIG_FILES([Makefile
-                 linux/Makefile
+                 parser/Makefile
+                 lexer/Makefile
+                 example/Makefile
                  tests/Makefile])
 AC_OUTPUT

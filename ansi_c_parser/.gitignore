@@ -11,4 +11,7 @@ INSTALL
 *.trs
 *.scan
 *~
+.deps/
+.libs/
+libtool
 

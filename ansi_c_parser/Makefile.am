@@ -1,7 +1,9 @@
 ACLOCAL_AMFLAGS = -I config
 
 SUBDIRS = \
-	linux \
+	parser \
+    lexer \
+    example \
 	tests
 
 test : check
