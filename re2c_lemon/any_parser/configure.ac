@@ -7,6 +7,7 @@ AC_CONFIG_AUX_DIR([config])
 AC_CONFIG_MACRO_DIR([config])
 AC_CONFIG_SRCDIR([example/example.c])
 AC_CONFIG_HEADERS([config/config.h])
+AC_REQUIRE_AUX_FILE([tap-driver.sh])
 
 AM_INIT_AUTOMAKE([foreign subdir-objects])
 

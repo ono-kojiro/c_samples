@@ -166,7 +166,9 @@ int Scanner_Scan(SCANNER *s)
     any = [^];
 */
 
+
     for (;;) {
+std:
 		s->tok = s->cur;
 #if DEBUG
 		fprintf(stderr, "%s:%d:%s: ",
@@ -182,7 +184,20 @@ int Scanner_Scan(SCANNER *s)
             re2c:define:YYFILL:naked = 1;
 		*/
 
+
 		/*!re2c
+			"/*" {
+				goto comment_c;
+			}
+			
+			"#" {
+				goto comment_perl;
+			}
+			
+			"//" {
+				goto comment_cxx;
+			}
+
 			eol {
 				fprintf(stderr, "(EOL)\n");
 				continue;
@@ -218,7 +233,64 @@ int Scanner_Scan(SCANNER *s)
 				RET(-1);
 			}
 		*/
+
+comment_c :
+		/*!re2c
+
+			"*/" {
+				goto std;
+			}
+
+			end {
+				fprintf(stderr, "\nERROR : unterminated comment\n");
+				exit(1);
+			}
+
+			* {
+				goto comment_c;
+			}
+
+		*/
+
+comment_perl :
+		/*!re2c
+			eol {
+				fprintf(stderr, "(EOL)\n");
+				goto std;
+			}
+
+			end {
+				fprintf(stderr, "\nERROR : unterminated comment\n");
+				exit(1);
+			}
+
+			* {
+				goto comment_perl;
+			}
+
+		*/
+
+comment_cxx :
+		/*!re2c
+			eol {
+				fprintf(stderr, "(EOL)\n");
+				goto std;
+			}
+
+			end {
+				fprintf(stderr, "\nERROR : unterminated comment\n");
+				exit(1);
+			}
+
+			* {
+				goto comment_cxx;
+			}
+
+		*/
+
+
 	}
+
 }
 
 int Scanner_Delete(SCANNER *s)
