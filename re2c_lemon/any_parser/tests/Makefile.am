@@ -3,7 +3,8 @@ TEST_LOG_DRIVER = env AM_TAP_AWK='$(AWK)' $(SHELL) \
 TESTS = \
 	test_simple.sh \
     test_alphabet.sh \
-    test_digits.sh
+    test_digits.sh \
+    test_hex.sh
 
 EXTRA_DIST = $(TESTS)
 
