@@ -11,6 +11,10 @@ aaa // this is comment
 'x063'
 '\"'
 '\?'
-\ \ \ \\ \\ \\\\\
+""
+"literal"
+\ \ \ \\ \\\
 abcdefg hijklmn
+'\\'
+end
 

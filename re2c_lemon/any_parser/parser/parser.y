@@ -66,6 +66,7 @@ line ::= i_constant .
 line ::= f_constant .
 line ::= dbs .
 line ::= backslash .
+line ::= string_literal .
 
 line ::= line wd .
 line ::= line dec .
@@ -74,6 +75,7 @@ line ::= line i_constant .
 line ::= line f_constant .
 line ::= line dbs .
 line ::= line backslash .
+line ::= line string_literal .
 
 dec       ::= DEC .
 wd        ::= WD .
@@ -82,3 +84,5 @@ i_constant ::= I_CONSTANT .
 f_constant ::= F_CONSTANT .
 backslash ::= BACKSLASH .
 dbs ::= DBS .
+string_literal ::= STRING_LITERAL .
+

@@ -187,8 +187,10 @@ int Scanner_Scan(SCANNER *s)
     FS  = ("f"|"F"|"l"|"L");     // float suffix
     IS  = ((("u"|"U")("l"|"L"|"ll"|"LL")?)|(("l"|"L"|"ll"|"LL")("u"|"U")?));
     CP  = ("u"|"U"|"L");
+	SP  = ("u8"|"u"|"U"|"L");
 
-	ES  = "\\"  ( ['"?abfnrtv] | [0-7]{1,3} );
+    DBS = "\\\\"; // double backslash
+	ES  = "\\"  ( [\'"?abfnrtv] | [0-7]{1,3} );
 	BS  = "\x5C";  // backspace 0d92
 
     wd  = (A)+;
@@ -239,12 +241,17 @@ std:
 				RET(EOF);
 			}
 
+			SP? "\"" ([^"])* "\"" {
+				PRINT_TOKEN("STRING_LITERAL");
+				return(STRING_LITERAL);
+			}
+
 			BS {
 				PRINT_TOKEN("BACKSLASH");
 				RET(BACKSLASH);
 			}
 
-			CP? "'" ([^']|ES|BS)+ "'" {
+			CP? "'" ([^'])+ "'" {
 				PRINT_TOKEN("I_CONSTANT");
 				RET(I_CONSTANT);
 			}
