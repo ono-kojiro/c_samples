@@ -10,7 +10,7 @@
 #include "parser.h"
 #endif
 
-#include "scanner.h"
+#include "any_scanner.h"
 
 int main(int argc, char **argv)
 {
@@ -31,7 +31,7 @@ int main(int argc, char **argv)
 	FILE *fp_out = NULL;
 	FILE *fp_in  = NULL;
 
-	SCANNER *s = NULL;
+	INPUT *s = NULL;
 	int token_id;
 
 #if USE_PARSER
@@ -96,10 +96,9 @@ int main(int argc, char **argv)
 		input = argv[optind];
 		fp_in = fopen(input, "rt");
 
-		s = Scanner_Create();
-		Scanner_Init(s);
-		Scanner_SetInput(s, fp_in);
-		Scanner_SetOutput(s, stdout);
+		s = Input_Create();
+		Input_Init(s);
+		Input_SetStream(s, fp_in, stdout);
 
 #if USE_PARSER
 		parser = (void *)MyParserAlloc(malloc, userdata);
@@ -114,10 +113,10 @@ int main(int argc, char **argv)
 #endif
 	
 		while(1){
-			token_id = Scanner_Scan(s);
+			token_id = AnyScanner_Scan(s);
 			if(token_id < 0){
 #if DEBUG
-				fprintf(stderr, "%s(%d) Scanner_Scan() returned %d\n",
+				fprintf(stderr, "DEBUG : %s(%d) AnyScanner_Scan() returned %d\n",
 					__FILE__ , __LINE__ , token_id);
 #endif
 				break;
@@ -134,7 +133,7 @@ int main(int argc, char **argv)
 			
 		}
 		
-		Scanner_Delete(s);
+		Input_Delete(s);
 
 #if USE_PARSER
 		MyParserFree(parser, free);

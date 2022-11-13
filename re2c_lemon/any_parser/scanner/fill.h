@@ -1,13 +1,11 @@
-static int fill(SCANNER *s, size_t need, size_t size, size_t yymaxfill)
+static int fill(INPUT *s, size_t need, size_t size, size_t yymaxfill)
 {
 	size_t nread = 0;
-    size_t free;
+    const size_t free = s->tok - s->buf;
 
     if (s->eof) {
         return 0;
     }
-    
-	free = s->tok - s->buf;
 
     if (free < need) {
         return 0;

@@ -20,13 +20,11 @@ enum {
 
 /*!max:re2c*/
 
-#include "scanner.h"
-#include "fill.h"
-
+#include "input.h"
 
 /*!re2c re2c:define:YYCTYPE = "unsigned char"; */
 
-int Simple_Scan(SCANNER *s)
+int Simple_Scan(INPUT *s)
 {
     unsigned long u;
 
@@ -69,7 +67,7 @@ int Simple_Scan(SCANNER *s)
             re2c:define:YYCURSOR = s->cur;
             re2c:define:YYMARKER = s->mar;
             re2c:define:YYLIMIT = s->lim;
-            re2c:define:YYFILL = "if (!fill(s, @@, SIZE, YYMAXFILL)) return EOF;";
+            re2c:define:YYFILL = "fill(s) == 0;";
             re2c:define:YYFILL:naked = 1;
 		*/
 

@@ -9,18 +9,7 @@
 
 #include <inttypes.h>
 
-#define SIZE (64 * 1024)
-
-/* export YYMAXFILL */
-/*!header:re2c:on*/
-
-/*!max:re2c*/
-
-/*!header:re2c:off*/
-
-/*!max:re2c*/
-
-#include "scanner.h"
+#include "input.h"
 #include "any_scanner.h"
 
 #if USE_PARSER
@@ -33,9 +22,8 @@
 	fprintf(stderr, ")"); \
 }
 
-/*!re2c re2c:define:YYCTYPE = "unsigned char"; */
 
-int AnyScanner_Scan(SCANNER *s)
+int AnyScanner_Scan(INPUT *s)
 {
     unsigned long u;
 
@@ -84,16 +72,25 @@ std:
 		fprintf(stderr, "for loop\n");
 #endif
         /*!re2c
+            re2c:eof = 0;
+            re2c:api:style = free-form;
             re2c:yyfill:enable = 1;
+            re2c:define:YYCTYPE = char;
             re2c:define:YYCURSOR = s->cur;
             re2c:define:YYMARKER = s->mar;
             re2c:define:YYLIMIT = s->lim;
-            re2c:define:YYFILL = "if (!fill(s, @@)) return EOF;";
-            re2c:define:YYFILL:naked = 1;
-		*/
+            re2c:define:YYFILL = "fill(s) == 0";
+			
+            * {
+				fprintf(stderr, "(UNKNOWN:%X)", s->tok[0]);
+				RET(-1);
+			}
+            
+            $ {
+				fprintf(stderr, "(EOF)\n");
+				RET(EOF);
+            }
 
-
-		/*!re2c
 			"/*" {
 				goto comment_c;
 			}
@@ -114,6 +111,11 @@ std:
 			end {
 				fprintf(stderr, "(EOF)\n");
 				RET(EOF);
+			}
+			
+            "'\\\\'" {
+				PRINT_TOKEN("I_CONSTANT");
+				RET(I_CONSTANT);
 			}
 
 			SP? "\"" ([^"])* "\"" {
@@ -172,10 +174,6 @@ std:
 				RET(ANY);
 			}
 			
-			* {
-				fprintf(stderr, "(UNKNOWN:%X)", s->tok[0]);
-				RET(-1);
-			}
 		*/
 
 comment_c :
@@ -184,6 +182,12 @@ comment_c :
 			"*/" {
 				goto std;
 			}
+            
+            $ {
+				fprintf(stderr, "\nERROR : unterminated comment\n");
+				exit(1);
+            }
+
 
 			end {
 				fprintf(stderr, "\nERROR : unterminated comment\n");
@@ -198,6 +202,11 @@ comment_c :
 
 comment_perl :
 		/*!re2c
+            $ {
+				fprintf(stderr, "\nERROR : unterminated comment\n");
+				exit(1);
+            }
+
 			eol {
 				fprintf(stderr, "(EOL)\n");
 				goto std;
@@ -216,6 +225,10 @@ comment_perl :
 
 comment_cxx :
 		/*!re2c
+            $ {
+				fprintf(stderr, "\nERROR : unterminated comment\n");
+				exit(1);
+            }
 			eol {
 				fprintf(stderr, "(EOL)\n");
 				goto std;

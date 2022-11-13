@@ -4,7 +4,7 @@ BUILT_SOURCES = any_scanner.c simple.c
 
 libscanner_la_SOURCES = \
     any_scanner.c \
-    scanner.c \
+    input.c \
     simple.c
 
 libscanner_la_CFLAGS = \

@@ -1,8 +1,8 @@
-#ifndef ANYSCANNER_H
-#define ANYSCANNER_H
+#ifndef ANY_SCANNER_H
+#define ANY_SCANNER_H
 
 #include <stdio.h>
-#include "scanner.h"
+#include "input.h"
 
 #if 0
 #if USE_PARSER
@@ -24,8 +24,8 @@ enum {
 #endif
 #endif
 
-int AnyScanner_Scan(SCANNER *s);
+int AnyScanner_Scan(INPUT *s);
 
-#endif /* #ifndef SCANNER_H */
+#endif /* #ifndef ANY_SCANNER_H */
 
 
