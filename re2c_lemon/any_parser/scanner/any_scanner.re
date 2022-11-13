@@ -111,6 +111,11 @@ std:
 				PRINT_TOKEN("BACKSLASH");
 				RET(BACKSLASH);
 			}
+			
+            CP? "'" (ES)+ "'" {
+				PRINT_TOKEN("I_CONSTANT");
+				RET(I_CONSTANT);
+			}
 
 			CP? "'" ([^'])+ "'" {
 				PRINT_TOKEN("I_CONSTANT");
