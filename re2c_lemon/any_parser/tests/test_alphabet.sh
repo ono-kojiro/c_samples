@@ -2,7 +2,7 @@
 
 example=../example/example
 
-$example alphabet.txt > $0.got
+$example -o $0.got alphabet.txt
 
-diff -urp $0.exp $0.got
+diff -urp $0.got $0.exp
 

@@ -16,13 +16,6 @@
 #include "parser.h"
 #endif
 
-#define PRINT_TOKEN(x) { \
-	fprintf(s->out, "(%s:", x); \
-	fprintf(s->out, "%.*s", (int)(s->cur - s->tok), s->tok); \
-	fprintf(s->out, ")"); \
-}
-
-
 int AnyScanner_Scan(INPUT *s)
 {
     unsigned long u;
@@ -49,7 +42,7 @@ int AnyScanner_Scan(INPUT *s)
 	SP  = ("u8"|"u"|"U"|"L");
 
     DBS = "\\\\"; // double backslash
-	ES  = "\\"  ( [\'"?abfnrtv] | [0-7]{1,3} );
+	ES  = "\\"  ( [\'"?abfnrtv] | [0-7]{1,3} | "x" [a-FA-F0-9]+);
 	BS  = "\x5C";  // backspace 0d92
 
     wd  = (A)+;

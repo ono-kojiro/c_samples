@@ -10,9 +10,9 @@
 }
 
 #define PRINT_TOKEN(x) { \
-	fprintf(stderr, "(%s:", x); \
-	fprintf(stderr, "%.*s", (int)(s->cur - s->tok), s->tok); \
-	fprintf(stderr, ")"); \
+	fprintf(s->out, "(%s:", x); \
+	fprintf(s->out, "%.*s", (int)(s->cur - s->tok), s->tok); \
+	fprintf(s->out, ")"); \
 }
 
 typedef struct

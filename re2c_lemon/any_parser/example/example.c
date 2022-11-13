@@ -107,7 +107,7 @@ int main(int argc, char **argv)
 
 		s = Input_Create();
 		Input_Init(s);
-		Input_SetStream(s, fp_in, stdout);
+		Input_SetStream(s, fp_in, fp_out);
 
 #if USE_PARSER
 		parser = (void *)MyParserAlloc(malloc, userdata);

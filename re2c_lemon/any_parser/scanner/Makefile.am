@@ -5,7 +5,9 @@ BUILT_SOURCES = any_scanner.c simple.c
 libscanner_la_SOURCES = \
     any_scanner.c \
     input.c \
-    simple.c
+    simple.c \
+    util.h \
+    util.c
 
 libscanner_la_CFLAGS = \
 	-I$(top_builddir)/parser
