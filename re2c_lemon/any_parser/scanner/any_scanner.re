@@ -11,6 +11,7 @@
 
 #define SIZE (64 * 1024)
 
+/* export YYMAXFILL */
 /*!header:re2c:on*/
 
 /*!max:re2c*/
@@ -20,6 +21,7 @@
 /*!max:re2c*/
 
 #include "scanner.h"
+#include "any_scanner.h"
 
 #if USE_PARSER
 #include "parser.h"
@@ -31,149 +33,15 @@
 	fprintf(stderr, ")"); \
 }
 
-int dump_scanner(SCANNER *s)
-{
-	int i;
-	fprintf(stderr, "token : '%.*s'",
-		(int)(s->cur - s->tok), s->tok);
-	fprintf(stderr, "ftell() is %d\n", s->file);
-	fprintf(stderr, "tok : 0x%" PRIXPTR "\n", (uintptr_t)s->tok);
-	fprintf(stderr, "cur : 0x%" PRIXPTR "\n", (uintptr_t)s->cur);
-	fprintf(stderr, "lim : 0x%" PRIXPTR "\n", (uintptr_t)s->lim);
-	fprintf(stderr, "eof : %d\n", s->eof);
-
-	return 0;
-}
-
-int fill(SCANNER *s, size_t need)
-{
-	size_t nread = 0;
-    size_t free;
-
-#if DEBUG
-	fprintf(stderr, "%s:%d:%s: ",
-		__FILE__ , __LINE__ , __FUNCTION__ );
-	fprintf(stderr, "fill() is called\n");
-#endif
-
-    if (s->eof) {
-#if DEBUG
-		fprintf(stderr, "%s:%d:%s: ",
-			__FILE__ , __LINE__ , __FUNCTION__ );
-		dump_scanner(s);
-#endif
-		if(s->cur < s->lim - YYMAXFILL){
-			fprintf(stderr, "but continue\n");
-			return 1;
-		}
-		else {
-			dump_scanner(s);
-			fprintf(stderr, "s->eof\n");
-		}
-        return 0;
-    }
-    
-	free = s->tok - s->buf;
-
-#if DEBUG
-	fprintf(stderr, "DEBUG : %s(%d) in%s, fill, free is %d, need = %d\n",
-		__FILE__ , __LINE__ , __FUNCTION__ ,
-		free, need	
-		);
-#endif
-    if (free < need) {
-#if DEBUG
-		fprintf(stderr, "%s(%d) in %s\n",
-			__FILE__ , __LINE__ , __FUNCTION__ );
-		fprintf(stderr, "free < need\n");
-#endif
-        return 0;
-    }
-    memmove(s->buf, s->tok, s->lim - s->tok);
-    s->lim -= free;
-    s->cur -= free;
-    s->mar -= free;
-    s->tok -= free;
-    nread = fread(s->lim, 1, free, s->file);
-    s->lim += nread;
-    if (s->lim < s->buf + SIZE) {
-#if DEBUG
-		fprintf(stderr, "%s(%d) in %s\n",
-			__FILE__ , __LINE__ , __FUNCTION__ );
-		fprintf(stderr, "read %d bytes from file\n", nread);
-		fprintf(stderr, "set s->eof 1\n");
-#endif
-        s->eof = 1;
-        memset(s->lim, 0, YYMAXFILL);
-        s->lim += YYMAXFILL;
-    }
-    return 1;
-}
-
-SCANNER *Scanner_Create()
-{
-	SCANNER *s = (SCANNER *)malloc(1 * sizeof(SCANNER));
-	memset(s, 0, 1 * sizeof(SCANNER));
-#if DEBUG
-	fprintf(stderr, "SCANNER : Scanner_Create()\n");
-#endif
-
-	return s;
-}
-
-int Scanner_Init(SCANNER *s)
-{
-	if(s->buf){
-		free(s->buf);
-		s->buf = NULL;
-	}
-	s->buf = (unsigned char *)malloc(SIZE + YYMAXFILL);
-	if(!s->buf){
-		return 1;
-	}
-
-	s->lim = s->buf + SIZE;
-	s->cur = s->lim;
-	s->mar = s->lim;
-	s->tok = s->lim;
-	s->eof = 0;
-	s->file = stdin;
-	s->out = stdout;
-
-#if DEBUG
-	fprintf(stderr, "SCANNER : Scanner_Init\n");
-#endif
-	return 0;
-}
-
-int Scanner_SetInput(SCANNER *s, FILE *fp)
-{
-	s->file = fp;
-#if DEBUG
-	fprintf(stderr, "SCANNER : Scanner_SetInput()\n");
-#endif
-	return 0;
-}
-
-int Scanner_SetOutput(SCANNER *s, FILE *fp)
-{
-	s->out = fp;
-#if DEBUG
-	fprintf(stderr, "SCANNER : Scanner_SetOutput()\n");
-#endif
-	return 0;
-}
-
-
 /*!re2c re2c:define:YYCTYPE = "unsigned char"; */
 
-int Scanner_Scan(SCANNER *s)
+int AnyScanner_Scan(SCANNER *s)
 {
     unsigned long u;
 
 	/* from submatch/http_rfc7230.re */
 
-#if DEBUG
+#if 0
 	fprintf(stderr, "SCANNER : Scanner_Scan() start\n");
 #endif
 
@@ -210,7 +78,7 @@ int Scanner_Scan(SCANNER *s)
     for (;;) {
 std:
 		s->tok = s->cur;
-#if DEBUG
+#if 0
 		fprintf(stderr, "%s:%d:%s: ",
 			__FILE__ , __LINE__ , __FUNCTION__ );
 		fprintf(stderr, "for loop\n");
@@ -363,20 +231,6 @@ comment_cxx :
 			}
 
 		*/
-
-
-	}
-
-}
-
-int Scanner_Delete(SCANNER *s)
-{
-	if(s){
-		if(s->buf){
-			free(s->buf);
-		}
-		free(s);
 	}
 }
-
 

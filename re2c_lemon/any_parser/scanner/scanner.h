@@ -7,6 +7,7 @@
 	return (x); \
 }
 
+#if 0
 #if USE_PARSER
 #else
 enum {
@@ -24,6 +25,13 @@ enum {
 	ANY
 };
 #endif
+#endif
+
+#define PRINT_TOKEN(x) { \
+	fprintf(stderr, "(%s:", x); \
+	fprintf(stderr, "%.*s", (int)(s->cur - s->tok), s->tok); \
+	fprintf(stderr, ")"); \
+}
 
 typedef struct _SCANNER
 {
@@ -43,7 +51,7 @@ SCANNER *Scanner_Create();
 int Scanner_Init(SCANNER *s);
 int Scanner_SetInput(SCANNER *s, FILE *fp);
 int Scanner_SetOutput(SCANNER *s, FILE *fp);
-int Scanner_Scan(SCANNER *s);
+//int Scanner_Scan(SCANNER *s);
 int Scanner_Delete(SCANNER *s);
 
 #endif /* #ifndef SCANNER_H */
