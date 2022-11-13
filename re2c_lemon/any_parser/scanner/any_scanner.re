@@ -17,9 +17,9 @@
 #endif
 
 #define PRINT_TOKEN(x) { \
-	fprintf(stderr, "(%s:", x); \
-	fprintf(stderr, "%.*s", (int)(s->cur - s->tok), s->tok); \
-	fprintf(stderr, ")"); \
+	fprintf(s->out, "(%s:", x); \
+	fprintf(s->out, "%.*s", (int)(s->cur - s->tok), s->tok); \
+	fprintf(s->out, ")"); \
 }
 
 
@@ -28,10 +28,6 @@ int AnyScanner_Scan(INPUT *s)
     unsigned long u;
 
 	/* from submatch/http_rfc7230.re */
-
-#if 0
-	fprintf(stderr, "SCANNER : Scanner_Scan() start\n");
-#endif
 
 /*!re2c
     end = "\x00";
@@ -66,11 +62,6 @@ int AnyScanner_Scan(INPUT *s)
     for (;;) {
 std:
 		s->tok = s->cur;
-#if 0
-		fprintf(stderr, "%s:%d:%s: ",
-			__FILE__ , __LINE__ , __FUNCTION__ );
-		fprintf(stderr, "for loop\n");
-#endif
         /*!re2c
             re2c:eof = 0;
             re2c:api:style = free-form;
@@ -87,7 +78,7 @@ std:
 			}
             
             $ {
-				fprintf(stderr, "(EOF)\n");
+				fprintf(s->out, "(EOF)\n");
 				RET(EOF);
             }
 
@@ -104,12 +95,12 @@ std:
 			}
 
 			eol {
-				fprintf(stderr, "(EOL)\n");
+				fprintf(s->out, "(EOL)\n");
 				continue;
 			}
 
 			end {
-				fprintf(stderr, "(EOF)\n");
+				fprintf(s->out, "(EOF)\n");
 				RET(EOF);
 			}
 			
@@ -164,7 +155,7 @@ std:
 			}
 
 			ws {
-				fprintf(stderr, "%.*s",
+				fprintf(s->out, "%.*s",
 					(int)(s->cur - s->tok), s->tok);
 				continue;
 			}
@@ -208,7 +199,7 @@ comment_perl :
             }
 
 			eol {
-				fprintf(stderr, "(EOL)\n");
+				fprintf(s->out, "(EOL)\n");
 				goto std;
 			}
 
@@ -230,7 +221,7 @@ comment_cxx :
 				exit(1);
             }
 			eol {
-				fprintf(stderr, "(EOL)\n");
+				fprintf(s->out, "(EOL)\n");
 				goto std;
 			}
 

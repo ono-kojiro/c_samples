@@ -23,59 +23,40 @@ PKG_CHECK_MODULES([SQLITE3], [sqlite3 >= 3.37.2])
 # Checks for libraries.
 PKG_CHECK_MODULES([CHECK], [check >= 0.9.4])
 
+#######################
+###   Parser
+#######################
 AC_ARG_ENABLE([parser],
-	[
-		AS_HELP_STRING(
+	[ AS_HELP_STRING(
 			[--enable-parser],
-			[parser feature (default is yes)]
-		)
+			[enable parser (default is yes)])
 	],
-	[
-		case "${enableval}" in
-			yes )
-				enable_parser=yes
-				;;
-			no )
-				enable_parser=no
-				;;
-		esac
-	],
-	[
-		enable_parser="yes"
-	]
+	[ enable_parser="${enableval}" ],
+	[ enable_parser="yes" ]
 )
 
 AS_IF([test "x$enable_parser" = "xyes"],
-	[AC_DEFINE([USE_PARSER], [1], [parser support])],
-	[AC_DEFINE([USE_PARSER], [0], [parser support])]
+	[AC_DEFINE([USE_PARSER], [1], [use parser])],
+	[AC_DEFINE([USE_PARSER], [0], [use parser])]
 )
 
+#######################
+###   DEBUG
+#######################
 AC_ARG_ENABLE([debug],
-	[
-		AS_HELP_STRING(
+	[ AS_HELP_STRING(
 			[--enable-debug],
-			[enable debug (default is yes)]
-		)
+			[enable debug (default is no)])
 	],
-	[
-		case "${enableval}" in
-			yes )
-				enable_debug=yes
-				;;
-			no )
-				enable_debug=no
-				;;
-		esac
-	],
-	[
-		enable_debug="yes"
-	]
+	[ enable_debug="${enableval}" ],
+	[ enable_debug="no" ]
 )
 
 AS_IF([test "x$enable_debug" = "xyes"],
 	[AC_DEFINE([DEBUG], [1], [enable debug])],
 	[AC_DEFINE([DEBUG], [0], [enable debug])]
 )
+
 
 AC_ARG_ENABLE([debug-parser],
 	[ AS_HELP_STRING(

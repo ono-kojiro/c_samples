@@ -44,6 +44,9 @@ int main(int argc, char **argv)
 
 	const char *database = NULL;
 
+    int debug = 0;
+    char *env_debug = NULL;
+
 	while(1){
 		c = getopt_long(
 				argc,
@@ -78,6 +81,12 @@ int main(int argc, char **argv)
 	else{
 		fp_out = stdout;
 	}
+
+    env_debug = getenv("DEBUG");
+    if(env_debug){
+        debug = 1;
+    }
+    
 
 #if USE_PARSER
 	userdata = Userdata_Create();
