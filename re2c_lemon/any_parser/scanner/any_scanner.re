@@ -9,8 +9,15 @@
 
 #include <inttypes.h>
 
-/*!max:re2c*/
 #define SIZE (64 * 1024)
+
+/*!header:re2c:on*/
+
+/*!max:re2c*/
+
+/*!header:re2c:off*/
+
+/*!max:re2c*/
 
 #include "scanner.h"
 
