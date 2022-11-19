@@ -1,8 +1,11 @@
 #!/usr/bin/env sh
 
+basename=$(basename $0 .sh)
+testcase=`echo $basename | sed 's/test_//'`
+
 example=../example/example
 
-$example -o $0.got alphabet.txt
+$example -o ${basename}.got ${testcase}.txt
 
-diff -urp $0.got $0.exp
+diff -urp ${basename}.got ${basename}.exp
 
