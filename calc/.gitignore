@@ -13,3 +13,12 @@ Makefile.in
 *.o
 *.lo
 
+*.ddeb
+*.buildinfo
+*.changes
+*.deb
+*.dsc
+*.tar.xz
+*~
+
+
