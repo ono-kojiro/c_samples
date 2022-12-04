@@ -2,4 +2,5 @@ output.txt
 *.got
 *.trs
 *.log
+*.xml
 
