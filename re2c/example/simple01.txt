@@ -1,4 +1,3 @@
-AAA BBB CCC
-123 456
-lkjfdadfas lkjlkjlkjkj
+1..1
+ok
 

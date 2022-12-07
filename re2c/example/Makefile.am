@@ -9,7 +9,8 @@ example_CFLAGS = \
 example_LDFLAGS =
 
 example_LDADD = \
+	$(top_builddir)/parser/libparser.la \
 	$(top_builddir)/scanner/libscanner.la
 
-TESTS = 01-simple.sh
+TESTS = 01-simple.sh 02-simple_tap.sh
 

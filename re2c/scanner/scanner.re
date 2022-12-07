@@ -69,38 +69,31 @@ static int lex(struct Input *in) {
         dec = [1-9][0-9]*;
         hex = "0x" [0-9a-fA-F]+;
 
+        plan = "1.." dec;
+        testpoint = ("not ")? "ok";
+
         end {
             fprintf(stderr, " (END) ");
             fprintf(stderr, "\n");
             RET(END);
         }
 
-        str  { ++count;
-            fprintf(stderr, " (STR:%.*s) ", in->cur - in->tok, in->tok);
-            RET(STR);
-        }
-        id {
-            fprintf(stderr, " (ID:%.*s) ", in->cur - in->tok, in->tok);
-            RET(ID);
-        }
-        
-        oct {
-            fprintf(stderr, " (OCT:%.*s) ", in->cur - in->tok, in->tok);
-            RET(OCT);
+        plan {
+            fprintf(stderr, " (PLAN) ");
+            RET(PLAN);
         }
 
-        dec {
-            fprintf(stderr, " (DEC:%.*s) ", in->cur - in->tok, in->tok);
-            RET(DEC);
+        testpoint {
+            fprintf(stderr, " (TESTPOINT) ");
+            RET(TESTPOINT);
         }
-        hex {
-            fprintf(stderr, " (HEX:%.*s) ", in->cur - in->tok, in->tok);
-            RET(HEX);
+
+        nl {
+            RET(NL);
         }
 
         ws {
-            fprintf(stderr, " (WS) ");
-            RET(WS);
+            continue;
         }
 
         nl {

@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
 
-./example simple01.txt
+./example -o simple01.log simple01.txt
 
 

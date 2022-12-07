@@ -8,7 +8,9 @@
 #include <unistd.h>
 #include <getopt.h>
 
-//#include "parser.h"
+#include <sqlite3.h>
+
+#include "parser.h"
 #include "scanner.h"
 
 int main(int argc, char **argv)
@@ -41,6 +43,9 @@ int main(int argc, char **argv)
 	SCANNER *s;
     int id;
 
+	void *parser = NULL;
+	Token token;
+
     while(1){
         c = getopt_long(argc, argv, "hvo:", options, &index);
         if(c == -1){
@@ -67,23 +72,18 @@ int main(int argc, char **argv)
         out = stdout;
     }
 
-#if 0
-	bufsize = Scanner_GetBufSize(s);
-
-    for (i = 0; i < bufsize; ++i) {
-        fwrite(content, 1, sizeof(content) - 1, f);
-    }
-    fclose(f);
-    int count = 3 * bufsize; // number of quoted strings written to file
-#endif
-
-    // Initialize lexer state: all pointers are at the end of buffer.
-    // This immediately triggers YYFILL, as the check `in.cur < in.lim` fails.
-
     for(i = optind; i < argc; i++){
         input = argv[i];
 	    s = Scanner_Create();
 	    Scanner_Init(s);
+
+		parser = (void *)ParseAlloc(malloc);
+		if(!parser){
+			fprintf(stderr, "ParseAlloc failed\n");
+			exit(1);
+		}
+		ParseTrace(stdout, "DEBUG :");
+		ParseInit(parser);
 
 	    Scanner_Open(s, input);
 
@@ -92,14 +92,14 @@ int main(int argc, char **argv)
             if(ret != 0){
                 break;
             }
+
+			Parse(parser, ret, token);
         }
 
 	    Scanner_Delete(s);
+		ParseFree(parser, free);
     }
    
-    // Cleanup: remove input file.
-    //remove(fname);
-    
     if(output){
         fclose(out);
     }

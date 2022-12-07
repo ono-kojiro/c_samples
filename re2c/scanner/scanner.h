@@ -3,6 +3,14 @@
 
 #define RET(x) { return x; }
 
+#define END -1
+#define ANY 0
+
+#define USE_PARSER 1
+
+#if USE_PARSER
+#include "parser.h"
+#else
 enum {
   ANY = 0,
   END,
@@ -12,8 +20,10 @@ enum {
   DEC,
   HEX,
   WS,
+  PLAN,
   NL
 };
+#endif
 
 typedef struct {
   int n;

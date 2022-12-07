@@ -8,6 +8,8 @@ AC_CONFIG_MACRO_DIR([config])
 AC_CONFIG_SRCDIR([example/example.c])
 AC_CONFIG_HEADERS([config/config.h])
 
+AC_REQUIRE_AUX_FILE([tap-driver.sh])
+
 AM_INIT_AUTOMAKE([foreign subdir-objects])
 LT_INIT
 
@@ -25,6 +27,9 @@ PKG_CHECK_MODULES([CHECK], [check >= 0.9.4])
 AC_CHECK_FUNCS([memset])
 
 AC_CONFIG_FILES([Makefile
+                 tools/Makefile
+                 parser/Makefile
                  example/Makefile
-                 scanner/Makefile])
+                 scanner/Makefile
+                 tests/Makefile])
 AC_OUTPUT
