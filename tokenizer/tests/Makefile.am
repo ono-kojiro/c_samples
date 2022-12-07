@@ -16,5 +16,6 @@ EXTRA_DIST = $(TESTS)
 test : check
 
 prove :
-	prove --formatter TAP::Formatter::JUnit test_*.t > tap_results.xml
+	prove --formatter TAP::Formatter::JUnit test_*.t \
+		> tap_results.xml 2> tap_results.log
 
