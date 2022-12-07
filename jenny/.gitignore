@@ -8,5 +8,7 @@ config.status
 config/
 configure
 work/
+jenny
+src/
 
 
