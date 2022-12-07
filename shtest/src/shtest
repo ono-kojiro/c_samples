@@ -8,7 +8,7 @@ if [ "$#" -eq 0 ]; then
 fi
 
 cmd="$@"
-echo $cmd
+$@
 
 if [ $? -eq 0 ]; then
   echo "ok - $cmd"
