@@ -1,6 +1,6 @@
 ACLOCAL_AMFLAGS = -I config
 
-SUBDIRS =
+SUBDIRS = tools/re2c
 
 if USE_PARSER
 SUBDIRS += tools \
