@@ -12,15 +12,17 @@ AC_REQUIRE_AUX_FILE([tap-driver.sh])
 AM_INIT_AUTOMAKE([foreign subdir-objects])
 LT_INIT
 
+AC_CONFIG_SUBDIRS([tools/re2c])
+
 # Checks for programs.
 AC_PROG_CC
 #AC_PROG_LIBTOOL
 
 # Checks for libraries.
-PKG_CHECK_MODULES([SQLITE3], [sqlite3 >= 3.37.2])
+PKG_CHECK_MODULES([SQLITE3], [sqlite3 >= 3.22.0])
 
 # Checks for libraries.
-PKG_CHECK_MODULES([CHECK], [check >= 0.9.4])
+#PKG_CHECK_MODULES([CHECK], [check >= 0.9.4])
 
 #######################
 ###   Parser

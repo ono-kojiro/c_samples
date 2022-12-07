@@ -1,5 +1,7 @@
 lib_LTLIBRARIES = libscanner.la
 
+RE2C = $(top_builddir)/tools/re2c/re2c
+
 BUILT_SOURCES = scanner.c
 
 libscanner_la_SOURCES = \
@@ -13,5 +15,5 @@ libscanner_la_CFLAGS = \
 -include scanner.dep
 
 .re.c :
-	re2c -o $@ --depfile scanner.dep $<
+	$(RE2C) -o $@ --depfile scanner.dep $<
 
