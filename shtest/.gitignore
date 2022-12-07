@@ -22,4 +22,5 @@ simple-0.0.1/
 rpmbuild/
 shtest-*/
 *.debian.tar.xz
+*.tar.xz
 
