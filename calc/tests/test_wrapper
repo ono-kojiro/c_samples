@@ -1,0 +1,31 @@
+#!/usr/bin/sh
+
+cmd="$@"
+
+test_name=""
+
+while [ "$#" -ne 0 ] ; do
+  case $1 in
+    --test-name )
+      shift
+      test_name="$1"
+      ;;
+    --trs-file )
+      shift
+      trs_file="$1"
+      ;;
+    -- )
+      break
+      ;;
+    * )
+      ;;
+  esac
+
+  shift
+done
+
+/usr/bin/time -o ${test_name}.time -p $cmd
+
+echo ":tes-tname: ${test_name}" >> ${trs_file}
+cat ${test_name}.time | awk '{ print ":" $1 "-time: " $2 }' >> ${trs_file}
+
