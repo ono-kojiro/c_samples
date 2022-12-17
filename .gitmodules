@@ -1,0 +1,5 @@
+[submodule "re2c"]
+  path = tokenizer/tools/re2c
+  url  = https://github.com/skvadrik/re2c.git
+
+
