@@ -1,0 +1,13 @@
+Makefile
+Makefile.in
+.deps/
+aclocal.m4
+autom4te.cache/
+autoscan.log
+config.log
+config.status
+config/
+configure
+*~
+test_calc
+
