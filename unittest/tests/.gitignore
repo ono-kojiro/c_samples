@@ -1,0 +1,9 @@
+*.log
+*.trs
+*.xml
+*.xsl
+02-init
+03-plus
+04-minus
+05-times
+

@@ -1,0 +1,5 @@
+#!/bin/sh
+
+cmake -G "Ninja" /usr/src/googletest
+ninja
+
