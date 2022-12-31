@@ -18,6 +18,7 @@ AC_PROG_CXX
 LT_INIT
 
 AC_CONFIG_SUBDIRS([gtest])
+AC_CONFIG_SUBDIRS([ctest])
 
 # Checks for libraries.
 PKG_CHECK_MODULES([CHECK], [check >= 0.9.4])
@@ -36,5 +37,6 @@ AC_CONFIG_FILES([Makefile
                  scanner/Makefile
 				 parser/Makefile
                  calc/Makefile
-                 tests/Makefile])
+                 tests/Makefile
+                 ctest/Makefile])
 AC_OUTPUT

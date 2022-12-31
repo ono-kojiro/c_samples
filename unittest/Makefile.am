@@ -5,5 +5,6 @@ SUBDIRS = \
 	parser \
 	scanner \
 	calc \
-    tests
+    tests \
+    ctest
 
