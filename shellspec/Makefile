@@ -1,14 +1,15 @@
-all :
+all : init gen test
+
+gen :
 	sh generate.sh
 
 init :
 	shellspec --init
 
-test :
-	shellspec
+check : test
 
-xml :
-	shellspec -f junit
+test :
+	@shellspec -f junit --reportdir . --output junit --quiet
 
 mclean :
 	rm -rf .shellspec

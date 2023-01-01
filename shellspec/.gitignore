@@ -1,0 +1,4 @@
+.shellspec
+spec/
+*.xml
+
