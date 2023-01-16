@@ -35,7 +35,7 @@ COMMON_LDADD = \
 04_gtest_simple_CPPFLAGS = \
     $(COMMON_CFLAGS) \
     -I/usr/src/googletest/googletest/include
-04_gtest_simple_LDFLAGS = -L$(top_builddir)/gtest/lib
+04_gtest_simple_LDFLAGS = -L$(top_builddir)/tools/gtest/lib
 04_gtest_simple_LDADD  = \
     $(COMMON_LDADD) \
     -lgtest -lgtest_main
