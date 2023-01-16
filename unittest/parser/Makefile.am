@@ -9,6 +9,8 @@ BUILT_SOURCES = parser.c parser.h
 
 libparser_la_SOURCES = parser.c userdata.c
 
+libparser_la_CFLAGS = -DNDEBUG=1
+
 parser.h : parser.c token.h $(MAKEHEADERS)
 	echo '#ifdef __cplusplus' > $@
 	echo 'extern "C" {' >> $@
@@ -24,4 +26,6 @@ parser.h : parser.c token.h $(MAKEHEADERS)
 parser.c : parser.y $(LEMON)
 	$(LEMON) T=$(top_builddir)/tools/lempar.c -m -q $<
 
+clean-local :
+	rm -f parser.c parser.h
 

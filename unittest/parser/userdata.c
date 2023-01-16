@@ -23,6 +23,9 @@ int Userdata_Delete(USERDATA *self)
 
 int Userdata_Init(USERDATA *self)
 {
+	if(self){
+		memset(self, 0, 1 * sizeof(USERDATA));
+	}
 	return 0;
 }
 

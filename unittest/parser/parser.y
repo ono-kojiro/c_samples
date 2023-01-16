@@ -21,11 +21,13 @@
 
 void token_destructor(Token t)
 {
+#ifndef NDEBUG
     fprintf(stderr, "\n");
     fprintf(stderr, "DEBUG : %s(%d)\n", __FILE__, __LINE__ );
     fprintf(stderr, "In token_destructor t.value= %d\n", t.value);
     fprintf(stderr, "In token_destructor t.n= %d\n", t.n);
     fprintf(stderr, "\n");
+#endif
 }
 
 }  
@@ -48,20 +50,25 @@ void token_destructor(Token t)
  
 %parse_accept
 {
+#ifndef NDEBUG
     fprintf(stderr, "\n");
-    fprintf(stderr, "parsing complete!\n\n\n"); 
+    fprintf(stderr, "parsing complete!\n\n\n");
+#endif
+    userdata->accept = 1;
 }
 
 %parse_failure
 {
     fprintf(stderr, "\n");
     fprintf(stderr, "parsing failed!\n\n\n");
+    userdata->failure = 1;
 }
    
 %syntax_error
 {
     fprintf(stderr, "\n");
     fprintf(stderr, "Syntax error!\n");
+    userdata->error = 1;
 }   
 
 %start_symbol main
@@ -73,8 +80,10 @@ in ::= in state NEWLINE.
 
 state ::= expr(A).
 { 
+#ifndef NDEBUG
     fprintf(stderr, "Result.n = %d\n", A.n);
     fprintf(stderr, "Result.value = %d\n", A.value);
+#endif
     userdata->result = A.value;
 }  
 
@@ -88,7 +97,6 @@ expr(A) ::= expr(B) PLUS  expr(C).
 {
   A.value = B.value + C.value; 
   A.n = B.n+1  + C.n+1;
-  fprintf(stderr, "DEBUG : expr ::= expr PLUS expr.\n");
 }  
 
 expr(A) ::= expr(B) TIMES  expr(C).
@@ -116,10 +124,13 @@ expr(A) ::= expr(B) DIVIDE expr(C).
 expr(A) ::= NUM(B).
 {
   A.value = B.value; A.n = B.n+1;
+#ifndef NDEBUG
   fprintf(stderr, "\n");
   fprintf(stderr, "DEBUG : expr ::= NUM\n");
   fprintf(stderr, "DEBUG : input value is %d\n", B.value);
   fprintf(stderr, "\n");
+#endif
+
 }
 
 /*

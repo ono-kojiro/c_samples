@@ -1,7 +1,3 @@
-TESTS = \
-  02-check_simple \
-  03-check_xml
-
 bin_PROGRAMS = \
   02-check_simple \
   03-check_xml
@@ -21,4 +17,9 @@ COMMON_LDADD = \
 03_check_xml_SOURCES = 03-check_xml.c
 03_check_xml_CFLAGS  = $(COMMON_CFLAGS) @CHECK_CFLAGS@
 03_check_xml_LDADD   = $(COMMON_LDADD)   @CHECK_LIBS@
+
+check :
+	./02-check_simple
+	./03-check_xml
+
 

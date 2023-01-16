@@ -8,6 +8,9 @@ extern "C" {
 typedef struct _USERDATA {
   int state;
   int result;
+  int accept;
+  int failure;
+  int error;
 } USERDATA;
 
 USERDATA *Userdata_Create();

@@ -10,10 +10,9 @@ COMMON_LDADD = \
     $(top_builddir)/scanner/libscanner.la
     
 05_cunit_simple_SOURCES = 05-cunit_simple.c
-05_cunit_simple_CFLAGS  = $(COMMON_CFLAGS) @CUNIT_CFLAGS@
+05_cunit_simple_CFLAGS  = $(COMMON_CFLAGS) @CUNIT_CFLAGS@ -DNDEBUG=1
 05_cunit_simple_LDADD   = $(COMMON_LDADD)   @CUNIT_LIBS@ -lm
 
 check :
 	./05-cunit_simple
-	cat 05-cunit_simple-Results.xml
 
