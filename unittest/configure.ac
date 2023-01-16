@@ -37,6 +37,7 @@ AC_CONFIG_FILES([Makefile
                  scanner/Makefile
 				 parser/Makefile
                  calc/Makefile
+                 cunit/Makefile
                  tests/Makefile
                  ctest/Makefile])
 AC_OUTPUT
