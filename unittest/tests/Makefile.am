@@ -1,10 +1,19 @@
 EXTRA_DIST = 01-run.sh
 
-TESTS = 01-run.sh 02-init 03-plus 04-minus 05-times
+TESTS = \
+  01-run.sh \
+  02-check_simple \
+  03-check_xml \
+  04-gtest_simple \
+  05-cunit_simple
 
 check_SCRIPTS = 01-run.sh
 
-bin_PROGRAMS = 02-init 03-plus 04-minus 05-times
+bin_PROGRAMS = \
+  02-check_simple \
+  03-check_xml \
+  04-gtest_simple \
+  05-cunit_simple
     
 COMMON_CFLAGS = \
     -I$(top_builddir)/parser \
@@ -14,26 +23,26 @@ COMMON_LDADD = \
     $(top_builddir)/parser/libparser.la \
     $(top_builddir)/scanner/libscanner.la
 
-02_init_SOURCES = 02-init.c
-02_init_CFLAGS = $(COMMON_CFLAGS) @CHECK_CFLAGS@
-02_init_LDADD = $(COMMON_LDADD)   @CHECK_LIBS@
+02_check_simple_SOURCES = 02-check_simple.c
+02_check_simple_CFLAGS  = $(COMMON_CFLAGS) @CHECK_CFLAGS@
+02_check_simple_LDADD   = $(COMMON_LDADD)   @CHECK_LIBS@
 
-03_plus_SOURCES = 03-plus.c
-03_plus_CFLAGS = $(COMMON_CFLAGS) @CHECK_CFLAGS@
-03_plus_LDADD = $(COMMON_LDADD)   @CHECK_LIBS@
+03_check_xml_SOURCES = 03-check_xml.c
+03_check_xml_CFLAGS  = $(COMMON_CFLAGS) @CHECK_CFLAGS@
+03_check_xml_LDADD   = $(COMMON_LDADD)   @CHECK_LIBS@
 
-04_minus_SOURCES = 04-minus.cpp
-04_minus_CPPFLAGS = \
+04_gtest_simple_SOURCES = 04-gtest_simple.cpp
+04_gtest_simple_CPPFLAGS = \
     $(COMMON_CFLAGS) \
     -I/usr/src/googletest/googletest/include
-04_minus_LDFLAGS = -L$(top_builddir)/gtest/lib
-04_minus_LDADD  = \
+04_gtest_simple_LDFLAGS = -L$(top_builddir)/gtest/lib
+04_gtest_simple_LDADD  = \
     $(COMMON_LDADD) \
     -lgtest -lgtest_main
 
-05_times_SOURCES = 05-times.c
-05_times_CFLAGS = $(COMMON_CFLAGS) @CUNIT_CFLAGS@
-05_times_LDADD = $(COMMON_LDADD)   @CUNIT_LIBS@ -lm
+05_cunit_simple_SOURCES = 05-cunit_simple.c
+05_cunit_simple_CFLAGS  = $(COMMON_CFLAGS) @CUNIT_CFLAGS@
+05_cunit_simple_LDADD   = $(COMMON_LDADD)   @CUNIT_LIBS@ -lm
 
 check : 03-plus.xml
 
