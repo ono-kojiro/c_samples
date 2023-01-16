@@ -28,7 +28,7 @@ START_TEST(test_plus)
 
 	MyParserInit(parser);
 
-#ifndef NDEBUG
+#if 0
 	MyParserTrace(stderr, prompt);
 #endif
 
@@ -60,6 +60,60 @@ START_TEST(test_plus)
 }
 END_TEST
 
+
+START_TEST(test_minus)
+{
+    Scanner in;
+	YYSTYPE yylval;
+
+	/* Parser */
+	void *parser = NULL;
+	char prompt[] = "PARSER : ";
+
+	/* Userdata */
+	USERDATA *userdata = NULL;
+    Token token;
+
+	parser = (void *)MyParserAlloc(malloc);
+    ck_assert_ptr_ne(parser, NULL);
+
+	userdata = Userdata_Create();
+    ck_assert_ptr_ne(userdata, NULL);
+
+	MyParserInit(parser);
+
+#if 0
+	MyParserTrace(stderr, prompt);
+#endif
+
+    /* 6 - 2 */
+    token.value = 6;
+    MyParser(parser, TOKEN_NUM, token, userdata);
+   
+    token.value = 0;
+    MyParser(parser, TOKEN_MINUS, token, userdata);
+
+    token.value = 2;
+    MyParser(parser, TOKEN_NUM, token, userdata);
+   
+    token.value = 0;
+    MyParser(parser, TOKEN_NEWLINE, token, userdata);
+    
+    token.value = 0;
+    MyParser(parser, 0, token, userdata);
+
+    ck_assert_int_eq(userdata->result, 4);
+
+    if(parser){
+	    MyParserFree(parser, free);
+    }
+
+	if(userdata){
+        Userdata_Delete(userdata);
+    }
+}
+END_TEST
+
 Suite *create_suite()
 {
     Suite *s;
@@ -69,6 +123,8 @@ Suite *create_suite()
     tc = tcase_create("Core");
 
     tcase_add_test(tc, test_plus);
+    tcase_add_test(tc, test_minus);
+
     suite_add_tcase(s, tc);
 
     return s;
@@ -84,7 +140,7 @@ int main(int argc, char **argv)
     s = create_suite();
     sr = srunner_create(s);
 
-    srunner_set_xml(sr, "03-plus-check.xml");
+    srunner_set_xml(sr, "03-check_xmlxml");
     srunner_run_all(sr, CK_NORMAL);
     number_failed = srunner_ntests_failed(sr);
     srunner_free(sr);

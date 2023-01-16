@@ -26,7 +26,7 @@ START_TEST(test_init)
 
 	MyParserInit(parser);
 
-#ifndef NDEBUG
+#if 0
 	MyParserTrace(stderr, "PARSER : ");
 #endif
 
