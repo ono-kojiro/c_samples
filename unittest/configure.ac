@@ -17,7 +17,7 @@ AC_PROG_CC
 AC_PROG_CXX
 LT_INIT
 
-AC_CONFIG_SUBDIRS([gtest])
+AC_CONFIG_SUBDIRS([tools/gtest])
 AC_CONFIG_SUBDIRS([ctest])
 
 # Checks for libraries.
