@@ -15,8 +15,9 @@
 
 void sig_int_handler(int fd, short event, void *arg)
 {
+    struct event_base *base = (struct event_base *)arg;
 	fprintf(stdout, "\n");
-	event_loopexit(NULL);
+	event_base_loopexit(base, NULL);
 }
 
 void read_stdin(int fd, short event, void *arg)
@@ -37,13 +38,14 @@ void read_stdin(int fd, short event, void *arg)
 		perror("closed");
 	}
 	else{
+#if 0
 		if(buf[len - 1] == '\n'){
 			buf[len - 1] = '\0';
 		}
 		else{
 			buf[len] = '\0';
 		}
-
+#endif
 		//fprintf(stderr, "DEBUG : '%s'\n", buf);
 
 		ret = send(soc, buf, strlen(buf), 0);
@@ -69,13 +71,14 @@ int main(int argc, char **argv)
 
 	int soc;
 
-	struct event ev;
-	struct event sig;
-	struct event ev_io;
+    struct event_base *base;
+	struct event *ev_rcv;
+	struct event *ev_int;
+	struct event *ev_io;
 
 	struct option options[] = {
 		{ "host", required_argument, 0, 'h' },
-		{ "port"    , required_argument, 0, 'p' },
+		{ "port", required_argument, 0, 'p' },
 		{ 0, 0, 0, 0 }
 	};
 
@@ -117,9 +120,9 @@ int main(int argc, char **argv)
 		exit(1);
 	}
 
-	event_init();
-	signal_set(&sig, SIGINT, sig_int_handler, NULL);
-	signal_add(&sig, NULL);
+    base = event_base_new();
+	ev_int = evsignal_new(base, SIGINT, sig_int_handler, (void *)base);
+    event_add(ev_int, NULL);
 
 	soc = client_socket(host, port);
 	if(soc == -1){
@@ -127,8 +130,9 @@ int main(int argc, char **argv)
 		exit(1);
 	}
 
-	event_set(&ev, soc, EV_READ | EV_PERSIST, recv_handler, &ev);
-	err = event_add(&ev, NULL);
+    ev_rcv = event_new(base, soc, EV_READ|EV_PERSIST, recv_handler, NULL);
+ 
+	err = event_add(ev_rcv, NULL);
 	if(err != 0){
 		perror("event_add");
 		close(soc);
@@ -137,9 +141,13 @@ int main(int argc, char **argv)
 
 	setbuf(stdin, NULL);
 	setbuf(stdout, NULL);
-	event_set(&ev_io, 0 /* stdin */, EV_READ | EV_PERSIST,
-			read_stdin, (void *)soc);
-	err = event_add(&ev_io, NULL);
+    ev_io = event_new(base,
+        0, // stdin
+        EV_READ|EV_PERSIST,
+        read_stdin,
+        (void *)soc
+    );
+	err = event_add(ev_io, NULL);
 	if(err != 0){
 		perror("event_add");
 		close(soc);
@@ -147,9 +155,11 @@ int main(int argc, char **argv)
 	}
 	fprintf(stdout, "> ");
 
-	event_dispatch();
+	event_base_dispatch(base);
 	fprintf(stderr, "END\n");
-	return 0;
+
+    event_base_free(base);
+	exit(0);
 }
 
 

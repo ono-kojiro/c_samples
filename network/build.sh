@@ -20,6 +20,11 @@ version()
 	:
 }
 
+prepare()
+{
+	sudo apt -y install cmake pkg-config libssl-dev
+}
+
 config()
 {
 	mkdir -p $build_dir
