@@ -1,6 +1,8 @@
 SRCS = main.c
 OBJS = $(SRCS:.c=.o)
 
+LDADD = -levent
+
 PROG = rot13
 
 all : obj prog
@@ -14,7 +16,7 @@ prog : $(PROG)
 	gcc -c -o $@ $<
 
 $(PROG) : $(OBJS)
-	gcc -o $@ $(OBJS)
+	gcc -o $@ $(OBJS) $(LDADD)
 
 clean :
 	rm -f $(OBJS) $(PROG)
