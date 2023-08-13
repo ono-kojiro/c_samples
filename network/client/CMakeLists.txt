@@ -2,7 +2,7 @@ project(client)
 
 add_executable(${PROJECT_NAME}
 		client.c
-		../common/common.c
+#		../common/common.c
 #		recv_handler.c
 	)
 

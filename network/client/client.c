@@ -111,6 +111,73 @@ void recv_callback(struct bufferevent *bev, void *ctx)
     }
 }
 
+int client_socket(const char *host, const char *port)
+{
+	int soc;
+	int err;
+
+	struct addrinfo *info;
+
+	{
+		struct addrinfo hints;
+		memset(&hints, 0, sizeof(hints));
+		hints.ai_family = AF_INET;
+		hints.ai_socktype = SOCK_STREAM;
+
+		err = getaddrinfo(host, port, &hints, &info);
+		if(err != 0){
+			fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(err));
+			exit(EXIT_FAILURE);
+		}
+	}
+
+    {
+	    char host[NI_MAXHOST];
+	    char service[NI_MAXSERV];
+
+	    err = getnameinfo(
+			info->ai_addr,info->ai_addrlen,
+			host,    NI_MAXHOST,
+			service, NI_MAXSERV,
+			NI_NUMERICHOST | NI_NUMERICSERV);
+	    if(err != 0){
+		    fprintf(stderr, "getnameinfo():%s\n", gai_strerror(err));
+		    freeaddrinfo(info);
+			exit(EXIT_FAILURE);
+	    }
+
+	    fprintf(stderr, "host = %s, service = %s\n", host, service);
+    }
+
+    {
+        struct addrinfo *rp;
+        for(rp = info; rp != NULL; rp = rp->ai_next){
+	        soc = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
+	        if(soc == -1){
+                continue;
+            }
+
+            err = connect(soc, rp->ai_addr, rp->ai_addrlen);
+            if(err != -1){
+                // success
+                break;
+            }
+
+            // failed
+            close(soc);
+	    }
+
+        if(rp == NULL){
+            fprintf(stderr, "Could not connect\n");
+            exit(EXIT_FAILURE);
+        }
+    }
+
+	freeaddrinfo(info);
+	return soc;
+}
+
+
 int main(int argc, char **argv)
 {
 	int ret = 0;
