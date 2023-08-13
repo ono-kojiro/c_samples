@@ -35,10 +35,9 @@ mystrlcat(char *dst, const char *src, size_t size)
 /* 送受信ハンドラ */
 void recv_handler(int acc, short event, void *arg)
 {
+    struct event_base *base = (struct event_base *)arg;
     char buf[512], *ptr;
     ssize_t len;
-    /* event_set()の第５引数のデータをargで受け取れる */
-    struct event *ev = (struct event*) arg;
 
     /* イベントのタイプが読み込み可能だった */
     if (event & EV_READ) {
@@ -46,16 +45,12 @@ void recv_handler(int acc, short event, void *arg)
         if ((len = recv(acc, buf, sizeof(buf), 0)) == -1) {
             /* エラー */
             perror("recv");
-	    (void) event_del(ev);
-	    free(ev);
             (void) close(acc);
             return;
         }
         if (len == 0) {
             /* エンド・オブ・ファイル */
             (void) fprintf(stderr, "recv:EOF\n");
-	    	(void) event_del(ev);
-	    	free(ev);
             (void) close(acc);
             return;
         }
@@ -68,10 +63,8 @@ void recv_handler(int acc, short event, void *arg)
 		
 		if(!strcmp(buf, "shutdown")){
 			fprintf(stderr, "shutdown tcpserver\n");
-			event_del(ev);
-			free(ev);
 			close(acc);
-			event_loopexit(NULL);
+			event_base_loopexit(base, NULL);
 			return;
 		}
 
@@ -82,8 +75,6 @@ void recv_handler(int acc, short event, void *arg)
         if ((len = send(acc, buf, (size_t) len, 0)) == -1) {
             /* エラー */
             perror("send");
-	    	(void) event_del(ev);
-	    	free(ev);
             (void) close(acc);
         }
 

@@ -20,6 +20,7 @@
 
 void accept_handler(int soc, short event, void *arg)
 {
+    struct event_base *base = (struct event_base *)arg;
 	int err;
 
 	char addr[NI_MAXHOST];
@@ -30,37 +31,20 @@ void accept_handler(int soc, short event, void *arg)
 
 	struct event *ev;
 
-	if(event & EV_READ){
-		len = (socklen_t) sizeof(storage);
-
-		acc = accept(soc, (struct sockaddr *)&storage, &len);
-		if(acc == -1){
-			perror("accept");
-			return;
-		}
-		else{
-			getnameinfo(
-				(struct sockaddr *)&storage,
-				len,
-				addr, sizeof(addr),
-				port, sizeof(port),
-				NI_NUMERICHOST | NI_NUMERICSERV);
-			fprintf(stderr, "accept:%s:%s\n", addr, port);
-		}
-
-		ev = (struct event *)malloc(1 * sizeof(struct event));
-		if(ev == NULL){
-			perror("malloc");
-			return;
-		}
-
-		event_set(ev, acc, EV_READ | EV_PERSIST, recv_handler, ev);
-		err = event_add(ev, NULL);
-		if(err != 0){
-			perror("event_add");
-			free(ev);
-			return;
-		}
+    acc = accept(soc, (struct sockaddr *)&storage, &len);
+	if(acc < 0){
+		perror("accept");
+	}
+    else if(acc > FD_SETSIZE){
+        close(fd);
+    }
+	else{
+        struct bufferevent *bev;
+        evutil_make_socket_nonblocking(acc);
+        bev = bufferevent_socket_new(base, acc, BEV_OPT_CLOSE_ON_FREE);
+        bufferevent_setcb(bev, read_callback, NULL, error_callback, NULL);
+        bufferevent_setwatermark(bev, EV_READ, 0, MAX_LINE);
+        bufferevent_enable(bev, EV_READ);
 	}
 }
 

@@ -3,7 +3,7 @@ project(server)
 add_executable(${PROJECT_NAME}
 		server.c
 		../common/common.c
-		accept_handler.c
+#		accept_handler.c
 		recv_handler.c
 	)
 
