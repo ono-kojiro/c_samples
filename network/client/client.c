@@ -11,7 +11,10 @@
 #include <getopt.h>
 
 #include "common.h"
-#include "recv_handler.h"
+
+struct userdata {
+  int soc;
+};
 
 void sig_int_handler(int fd, short event, void *arg)
 {
@@ -20,22 +23,22 @@ void sig_int_handler(int fd, short event, void *arg)
 	event_base_loopexit(base, NULL);
 }
 
-void read_stdin(int fd, short event, void *arg)
+void stdin_handler(int fd, short event, void *arg)
 {
 	int ret;
-	int soc = (int)arg;
+    struct userdata *ud = (struct userdata *)arg;
 	
 	char buf[256];
 	int len;
 
-	//fprintf(stderr, "read_stdin called\n");
+    int soc = ud->soc;
 
 	len = read(fd, buf, sizeof(buf) - 1);
 	if(len == -1){
 		perror("read error");
 	}
 	else if(len == 0){
-		perror("closed");
+		//perror("closed");
 	}
 	else{
 #if 0
@@ -56,7 +59,6 @@ void read_stdin(int fd, short event, void *arg)
 		}
 
 		if(!strcmp(buf, "exit")){
-			//fprintf(stderr, "exit read_stdin\n");
 			event_loopexit(NULL);
 		}
 		else {
@@ -89,51 +91,25 @@ size_t mystrlcat(char *dst, const char *src, size_t size)
 }
 
 /* 送受信ハンドラ */
-void recv_handler(int soc, short event, void *arg)
+void recv_callback(struct bufferevent *bev, void *ctx)
 {
-    char buf[512], *ptr;
-    ssize_t len;
-    /* event_set()の第５引数のデータをargで受け取れる */
-    struct event *ev = (struct event*) arg;
-
-    /* イベントのタイプが読み込み可能だった */
-    if (event & EV_READ) {
-        /* 受信 */
-        if ((len = recv(soc, buf, sizeof(buf), 0)) == -1) {
-            /* エラー */
-            perror("recv");
-			close(soc);
-            return;
+    struct evbuffer *in, *out;
+    char *line;
+    size_t n;
+    
+    in  = bufferevent_get_input(bev);
+    out = bufferevent_get_output(bev);
+    
+    while(1){
+        line = evbuffer_readln(in, &n, EVBUFFER_EOL_LF);
+        if(!line){
+            break;
         }
 
-        if (len == 0) {
-            /* エンド・オブ・ファイル */
-            (void) fprintf(stderr, "recv:EOF\n");
-			close(soc);
-            return;
-        }
-        /* 文字列化・表示 */
-        buf[len]='\0';
-        if ((ptr = strpbrk(buf, "\r\n")) != NULL) {
-            *ptr = '\0';
-        }
-        (void) fprintf(stderr, "[server]%s\n", buf);
-#if 0
-        /* 応答文字列作成 */
-        (void) mystrlcat(buf, ":OK\r\n", sizeof(buf));
-        len = (ssize_t) strlen(buf);
-        /* 応答 */
-        if ((len = send(acc, buf, (size_t) len, 0)) == -1) {
-            /* エラー */
-            perror("send");
-	    	(void) event_del(ev);
-			free(ev);
-            (void) close(acc);
-        }
-#endif
+        fprintf(stderr, "rcv: %*s\n", (int)n, line);
+        free(line);
     }
 }
-
 
 int main(int argc, char **argv)
 {
@@ -145,6 +121,8 @@ int main(int argc, char **argv)
 	struct event *ev_rcv;
 	struct event *ev_int;
 	struct event *ev_io;
+
+    struct userdata ud;
 
 	struct option options[] = {
 		{ "host", required_argument, 0, 'h' },
@@ -200,22 +178,23 @@ int main(int argc, char **argv)
 		exit(1);
 	}
 
-    ev_rcv = event_new(base, soc, EV_READ|EV_PERSIST, recv_handler, NULL);
- 
-	err = event_add(ev_rcv, NULL);
-	if(err != 0){
-		perror("event_add");
-		close(soc);
-		exit(1);
-	}
+    evutil_make_socket_nonblocking(soc);
+    {
+        struct bufferevent *bev;
+        bev = bufferevent_socket_new(base, soc, BEV_OPT_CLOSE_ON_FREE);
+        bufferevent_setcb(bev, recv_callback, NULL, NULL, NULL);
+        bufferevent_enable(bev, EV_READ);
+    }
+
+    ud.soc = soc;
 
 	setbuf(stdin, NULL);
 	setbuf(stdout, NULL);
     ev_io = event_new(base,
         0, // stdin
         EV_READ|EV_PERSIST,
-        read_stdin,
-        (void *)soc
+        stdin_handler,
+        (void *)&ud
     );
 	err = event_add(ev_io, NULL);
 	if(err != 0){
