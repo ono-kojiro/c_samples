@@ -38,19 +38,10 @@ void stdin_handler(int fd, short event, void *arg)
 		perror("read error");
 	}
 	else if(len == 0){
-		//perror("closed");
+        // Ctrl+D
 	}
 	else{
-#if 0
-		if(buf[len - 1] == '\n'){
-			buf[len - 1] = '\0';
-		}
-		else{
-			buf[len] = '\0';
-		}
-#endif
-        buf[len] = '\0';
-		fprintf(stderr, "DEBUG : '%s'\n", buf);
+		fprintf(stderr, "send : %s", buf);
 
 		ret = send(soc, buf, strlen(buf), 0);
 		if(ret == -1){
@@ -58,14 +49,8 @@ void stdin_handler(int fd, short event, void *arg)
 			event_loopexit(NULL);
 		}
 
-		if(!strcmp(buf, "exit")){
-			event_loopexit(NULL);
-		}
-		else {
-			fprintf(stdout, "> ");
-		}
+		fprintf(stdout, "> ");
 	}
-	//event_add(ev, NULL);
 }
 
 size_t mystrlcat(char *dst, const char *src, size_t size)
