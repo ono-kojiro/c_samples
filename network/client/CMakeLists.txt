@@ -3,7 +3,7 @@ project(client)
 add_executable(${PROJECT_NAME}
 		client.c
 		../common/common.c
-		recv_handler.c
+#		recv_handler.c
 	)
 
 target_include_directories(${PROJECT_NAME}
