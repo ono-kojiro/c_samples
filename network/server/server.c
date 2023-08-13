@@ -184,9 +184,19 @@ int server_socket(const char *host, const char *port)
 
     {
         struct addrinfo *rp;
+        int opt = 1;
+        socklen_t opt_len = sizeof(opt);
+
         for(rp = info; rp != NULL; rp = rp->ai_next){
 	        soc = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
 	        if(soc == -1){
+                perror("socket");
+                continue;
+            }
+
+            err = setsockopt(soc, SOL_SOCKET, SO_REUSEADDR, &opt, opt_len);
+            if(err == -1){
+                perror("setsockopt");
                 continue;
             }
 
