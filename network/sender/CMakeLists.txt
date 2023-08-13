@@ -2,8 +2,8 @@ project(sender)
 
 add_executable(${PROJECT_NAME}
 		sender.c
-		../common/common.c
-		recv_handler.c
+#		../common/common.c
+#		recv_handler.c
 	)
 
 target_include_directories(${PROJECT_NAME}
