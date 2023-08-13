@@ -71,7 +71,7 @@ void read_callback(struct bufferevent *bev, void *ctx)
         if(!line){
             break;
         }
-        fprintf(stderr, "rcv: %s\n", line);
+        fprintf(stderr, "rcv: %*s\n", n, line);
 
         evbuffer_add(out, line, n);
         evbuffer_add(out, "\n", 1);
@@ -137,9 +137,9 @@ void do_accept(int soc, short event, void *arg)
         }
         evutil_make_socket_nonblocking(acc);
         bev = bufferevent_socket_new(base, acc, BEV_OPT_CLOSE_ON_FREE);
-        bufferevent_setcb(bev, read_callback, NULL, error_callback, &acc);
+        bufferevent_setcb(bev, read_callback, NULL, error_callback, NULL);
         bufferevent_setwatermark(bev, EV_READ, 0, MAX_LINE);
-        bufferevent_enable(bev, EV_READ);
+        bufferevent_enable(bev, EV_READ|EV_WRITE);
 	}
 }
 
