@@ -91,7 +91,7 @@ void read_callback(struct bufferevent *bev, void *ctx)
 void error_callback(struct bufferevent *bev, short error, void *ctx)
 {
     if(error & BEV_EVENT_EOF){
-        fprintf(stderr, "BEV_EVENT_EOF\n");
+        fprintf(stderr, "Disconnected\n");
     }
     else if(error & BEV_EVENT_ERROR){
         fprintf(stderr, "BEV_EVENT_ERROR\n");
@@ -141,6 +141,73 @@ void do_accept(int soc, short event, void *arg)
         bufferevent_setwatermark(bev, EV_READ, 0, MAX_LINE);
         bufferevent_enable(bev, EV_READ|EV_WRITE);
 	}
+}
+
+int server_socket(const char *host, const char *port)
+{
+	int soc;
+	int err;
+
+	struct addrinfo *info;
+
+	{
+		struct addrinfo hints;
+		memset(&hints, 0, sizeof(hints));
+		hints.ai_family = AF_INET;
+		hints.ai_socktype = SOCK_STREAM;
+        hints.ai_flags = AI_PASSIVE; // for wildcard IP address
+
+		err = getaddrinfo(host, port, &hints, &info);
+		if(err != 0){
+			fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(err));
+			exit(EXIT_FAILURE);
+		}
+	}
+
+    {
+	    char host[NI_MAXHOST];
+	    char service[NI_MAXSERV];
+
+	    err = getnameinfo(
+			info->ai_addr,info->ai_addrlen,
+			host,    NI_MAXHOST,
+			service, NI_MAXSERV,
+			NI_NUMERICHOST | NI_NUMERICSERV);
+	    if(err != 0){
+		    fprintf(stderr, "getnameinfo():%s\n", gai_strerror(err));
+		    freeaddrinfo(info);
+			exit(EXIT_FAILURE);
+	    }
+
+	    fprintf(stderr, "host = %s, service = %s\n", host, service);
+    }
+
+    {
+        struct addrinfo *rp;
+        for(rp = info; rp != NULL; rp = rp->ai_next){
+	        soc = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
+	        if(soc == -1){
+                continue;
+            }
+
+            err = bind(soc, rp->ai_addr, rp->ai_addrlen);
+            if(err == 0){
+                // success
+                break;
+            }
+
+            // failed
+            close(soc);
+	    }
+
+        if(rp == NULL){
+            fprintf(stderr, "Could not bind\n");
+            exit(EXIT_FAILURE);
+        }
+    }
+
+	freeaddrinfo(info);
+	return soc;
 }
 
 int main(int argc, char **argv)
@@ -208,6 +275,12 @@ int main(int argc, char **argv)
 		fprintf(stderr, "server_socket failed\n");
 		exit(1);
 	}
+
+    if(listen(soc, SOMAXCONN) == -1){
+        perror("listen");
+        close(soc);
+        exit(EXIT_FAILURE);
+    }
 
 	ev_acpt = event_new(base, soc, EV_READ | EV_PERSIST, do_accept, base);
 	err = event_add(ev_acpt, NULL);
