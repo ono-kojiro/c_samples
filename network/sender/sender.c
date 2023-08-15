@@ -108,73 +108,6 @@ int print_name_info(struct addrinfo *info)
     return 0;
 }
 
-int sender_socket(const char *host, const char *port, 
-				const char *multicast_addr)
-{
-	int soc;
-
-	int err;
-	struct addrinfo *info;
-
-	unsigned char multicast_ttl = 64;
-	unsigned char multicast_loopback = 1;
-
-	soc = socket(PF_INET, SOCK_DGRAM, 0);
-	if(soc == -1){
-		perror("socket");
-		freeaddrinfo(info);
-		return -1;
-	}
-
-	{
-		struct addrinfo hints;
-		memset(&hints, 0, sizeof(hints));
-		hints.ai_family = AF_INET;
-		//hints.ai_socktype = SOCK_STREAM;
-		hints.ai_socktype = SOCK_DGRAM;
-
-		err = getaddrinfo(host, port, &hints, &info);
-		if(err != 0){
-			fprintf(stderr, "getaddrinfo():%s\n", gai_strerror(err));
-			return -1;
-		}
-	}
-
-	/* multicast settings */
-	err = setsockopt(soc, IPPROTO_IP, IP_MULTICAST_IF,
-					&((struct sockaddr_in *)info->ai_addr)->sin_addr,
-					sizeof(struct in_addr));
-	if(err == -1){
-		perror("setsockopt");
-		freeaddrinfo(info);
-		close(soc);
-		return -1;
-	}
-
-	err = setsockopt(soc, IPPROTO_IP, IP_MULTICAST_TTL,
-					&multicast_ttl, sizeof(multicast_ttl));
-	if(err == -1){
-		perror("setsockopt");
-		freeaddrinfo(info);
-		close(soc);
-		return -1;
-	}
-
-	err = setsockopt(soc, IPPROTO_IP, IP_MULTICAST_LOOP,
-					&multicast_loopback, sizeof(multicast_loopback));
-	if(err == -1){
-		perror("setsockopt");
-		freeaddrinfo(info);
-		close(soc);
-		return -1;
-	}
-	
-	freeaddrinfo(info);
-
-	return soc;
-}
-
-
 int main(int argc, char **argv)
 {
 	int ret = 0;
@@ -198,6 +131,8 @@ int main(int argc, char **argv)
 
 	const char *multicast_addr = NULL;
     struct addrinfo *info;
+	unsigned char multicast_ttl = 64;
+	unsigned char multicast_loopback = 1;
 
 	struct userdata data;
 
@@ -250,7 +185,7 @@ int main(int argc, char **argv)
 	ev_int = evsignal_new(base, SIGINT, sig_int_handler, (void *)base);
 	signal_add(ev_int, NULL);
 
-    ret = get_addr_info(NULL, port, &info);
+    ret = get_addr_info(host, port, &info);
     if(ret != 0){
         exit(1);
     }
@@ -258,11 +193,31 @@ int main(int argc, char **argv)
 
     data.info = info;
 
-	soc = sender_socket(host, port, multicast_addr);
+    soc = socket(info->ai_family, info->ai_socktype, info->ai_protocol);
 	if(soc == -1){
-		fprintf(stderr, "sender_socket failed\n");
-		exit(1);
+		perror("socket");
+		freeaddrinfo(info);
+		return -1;
 	}
+	
+    err = setsockopt(soc, IPPROTO_IP, IP_MULTICAST_TTL,
+					&multicast_ttl, sizeof(multicast_ttl));
+	if(err == -1){
+		perror("setsockopt");
+		freeaddrinfo(info);
+		close(soc);
+		return -1;
+	}
+
+	err = setsockopt(soc, IPPROTO_IP, IP_MULTICAST_LOOP,
+					&multicast_loopback, sizeof(multicast_loopback));
+	if(err == -1){
+		perror("setsockopt");
+		freeaddrinfo(info);
+		close(soc);
+		return -1;
+	}
+
 
 	data.soc = soc;
 	data.host = host;
