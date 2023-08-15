@@ -36,7 +36,7 @@ void stdin_handler(int fd, short event, void *arg)
 	int soc = data->soc;
 	const char *host = data->host;
 	const char *port = data->port;
-	const char *multicast_address = data->multicast_address;
+	const char *multicast_addr = data->multicast_addr;
     struct addrinfo *info = data->info;
 	
 	char buf[256];

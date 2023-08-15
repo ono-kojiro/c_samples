@@ -1,6 +1,7 @@
 #!/bin/sh
 
-set -e
+top_dir="$( cd "$( dirname "$0" )" >/dev/null 2>&1 && pwd )"
+cd $top_dir
 
 PROG=$(basename $0)
 VERSION="1.0"
@@ -32,7 +33,10 @@ config()
 		autoreconf -vi
 		cd $build_dir && sh ../configure
 	elif [ "x$build_dir" = "x_cbuild" ]; then
-		cd $build_dir && cmake -G "Unix Makefiles" ..
+		cd $build_dir && cmake \
+			-G "Unix Makefiles" \
+			-DCMAKE_TOOLCHAIN_FILE=../arm-toolchain.cmake \
+			..
 	else
 		echo invalid build_dir name, $build_dir
 		exit 1
@@ -72,6 +76,11 @@ receiver()
 sender()
 {
 	./$build_dir/sender/sender -h 127.0.0.1 -p 22222 -m 239.255.0.1
+}
+
+install()
+{
+  cd $build_dir && make install DESTDIR=${top_dir}/dest
 }
 
 

@@ -1,4 +1,4 @@
-project(client)
+project(client LANGUAGES C)
 
 add_executable(${PROJECT_NAME}
 		client.c
@@ -13,4 +13,5 @@ target_include_directories(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME} ${LIBEVENT_LIBRARIES})
 
+install(TARGETS client)
 

@@ -1,4 +1,4 @@
-project(sender)
+project(sender LANGUAGES C)
 
 add_executable(${PROJECT_NAME}
 		sender.c
@@ -13,4 +13,5 @@ target_include_directories(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME} ${LIBEVENT_LIBRARIES})
 
+install(TARGETS ${PROJECT_NAME})
 
