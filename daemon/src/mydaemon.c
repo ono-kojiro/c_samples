@@ -24,6 +24,9 @@
 #define MAXFD 64
 
 #include <event.h>
+
+#include <getopt.h>
+
 #include "common.h"
 #include "accept_handler.h"
 
@@ -106,14 +109,14 @@ int daemonize(int flag)
     return 0;
 }
 
-int start_server()
+int start_server(const char *port)
 {
 	int soc;
 	int err;
 	struct event ev;
 
 	const char *host = "localhost";
-	const char *port = "9999";
+	/* const char *port = "9999"; */
 
 	event_init();
 	soc = server_socket(host, port);
@@ -136,13 +139,71 @@ int start_server()
 
 int main(int argc, char **argv)
 {
+    int ret = 0;
+    int c;
+    int index;
+
+    struct option options[] = {
+        { "help",       no_argument, 0, 'h' },
+        { "foreground", no_argument, 0, 'F' },
+        { "port", required_argument, 0, 'p' },
+        { 0, 0, 0, 0 }
+    };
+    const char *port = NULL;
+    int show_help = 0;
+    int is_foreground = 0;
+
     char buf[PATH_MAX];
     char *str;
 
-    openlog(argv[0], LOG_CONS | LOG_PID, LOG_USER);
-    syslog(LOG_INFO, "call daemonize()");
+    while(1){
+        c = getopt_long(argc, argv, "hp:F", options, &index);
+        if(c == -1){
+            break;
+        }
 
-    daemonize(1);
+        switch(c){
+            case 'h' :
+                show_help = 1;
+                break;
+            case 'p' :
+                port = optarg;
+                break;
+            case 'F' :
+                is_foreground = 1;
+                break;
+        }
+    }
+
+    if(show_help){
+        printf("Usage: %s <options>\n", argv[0]);
+        printf("  options:\n");
+        printf("\n");
+        printf("  -h, --help\n");
+        printf("  -p, --port\n");
+        printf("  -F, --foreground\n");
+        exit(1);
+    }
+
+    if(!port){
+        fprintf(stderr, "ERROR: no port option\n");
+        ret++;
+    }
+
+    if(ret){
+        exit(ret);
+    }
+
+
+    if(!is_foreground){
+        openlog(argv[0], LOG_CONS | LOG_PID, LOG_USER);
+        syslog(LOG_INFO, "call daemonize()");
+        daemonize(1);
+    }
+    else {
+        openlog(NULL, LOG_PERROR, LOG_USER);
+        syslog(LOG_INFO, "call daemonize()");
+    }
     str = getcwd(buf, sizeof(buf));
 
     if(str == NULL){
@@ -158,7 +219,7 @@ int main(int argc, char **argv)
         sleep(1);
     }
 	*/
-	start_server();
+	start_server(port);
 
     closelog();
 

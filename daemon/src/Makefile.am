@@ -16,9 +16,3 @@ mydaemond_LDFLAGS =
 
 mydaemond_LDADD = -levent
 
-start :
-	./mydaemond
-
-stop :
-	pkill mydaemond
-

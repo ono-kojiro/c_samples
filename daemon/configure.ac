@@ -27,5 +27,6 @@ AC_CONFIG_FILES([Makefile
                  src/mydaemon.service
                  src/Makefile])
 AC_CONFIG_FILES([client/Makefile])
+AC_CONFIG_FILES([tests/Makefile])
 
 AC_OUTPUT
