@@ -7,8 +7,11 @@ debug :
 	$(top_builddir)/src/mydaemond -p 1234 -F
 
 stop :
-	pkill mydaemond
+	-pkill mydaemond
 
 test :
 	$(top_builddir)/client/client --host localhost --port $(PORT)
+
+cmd :
+	$(top_builddir)/client/client --host localhost --port 9999
 

@@ -4,7 +4,7 @@ SUBDIRS = src \
 	client
 
 prepare :
-	sudo apt -y install libevent-dev
+	ansible-playbook -K -i hosts.yml site.yml
 
 start :
 	$(MAKE) -C tests start
@@ -17,6 +17,8 @@ stop :
 
 test :
 	$(MAKE) -C tests test
+cmd :
+	$(MAKE) -C tests cmd
 
 package :
 	$(MAKE) install DESTDIR=`pwd`/$(PACKAGE)-$(VERSION)

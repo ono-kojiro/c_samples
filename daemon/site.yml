@@ -1,0 +1,11 @@
+- name: setup development tools
+  hosts: localhost
+
+  tasks:
+  - name: install libevent-devel
+    ansible.builtin.dnf:
+      name:
+      - libevent-devel
+      state: present
+    become: true
+

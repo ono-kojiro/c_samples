@@ -29,6 +29,7 @@
 
 #include "common.h"
 #include "accept_handler.h"
+#include "cmd_handler.h"
 
 void signal_handler(int sig)
 {
@@ -114,6 +115,7 @@ int start_server(const char *port)
 	int soc;
 	int err;
 	struct event ev;
+    struct event ev_cmd;
 
 	const char *host = "localhost";
 	/* const char *port = "9999"; */
@@ -127,6 +129,20 @@ int start_server(const char *port)
 
 	event_set(&ev, soc, EV_READ | EV_PERSIST, accept_handler, &ev);
 	err = event_add(&ev, NULL);
+	if(err != 0){
+	    syslog(LOG_INFO, "event_add failed");
+		close(soc);
+		exit(1);
+	}
+	
+    soc = server_socket(host, "9999");
+	if(soc == -1){
+	    syslog(LOG_INFO, "server_socket failed");
+		exit(1);
+	}
+
+	event_set(&ev_cmd, soc, EV_READ | EV_PERSIST, accept_cmd, &ev_cmd);
+	err = event_add(&ev_cmd, NULL);
 	if(err != 0){
 	    syslog(LOG_INFO, "event_add failed");
 		close(soc);
