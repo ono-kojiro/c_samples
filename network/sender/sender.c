@@ -37,6 +37,53 @@ void sig_int_handler(int fd, short event, void *arg)
 	event_base_loopexit(base, NULL);
 }
 
+/* 送受信ハンドラ */
+void recv_handler(int soc, short event, void *arg)
+{
+    char buf[512], *ptr;
+    ssize_t len;
+    /* event_set()の第５引数のデータをargで受け取れる */
+    struct event *ev = (struct event*) arg;
+
+    /* イベントのタイプが読み込み可能だった */
+    if (event & EV_READ) {
+        /* 受信 */
+        if ((len = recv(soc, buf, sizeof(buf), 0)) == -1) {
+            /* エラー */
+            perror("recv");
+			close(soc);
+            return;
+        }
+
+        if (len == 0) {
+            /* エンド・オブ・ファイル */
+            (void) fprintf(stderr, "recv:EOF\n");
+			close(soc);
+            return;
+        }
+        /* 文字列化・表示 */
+        buf[len]='\0';
+        if ((ptr = strpbrk(buf, "\r\n")) != NULL) {
+            *ptr = '\0';
+        }
+        (void) fprintf(stderr, "[received]%s\n", buf);
+#if 0
+        /* 応答文字列作成 */
+        (void) mystrlcat(buf, ":OK\r\n", sizeof(buf));
+        len = (ssize_t) strlen(buf);
+        /* 応答 */
+        if ((len = send(acc, buf, (size_t) len, 0)) == -1) {
+            /* エラー */
+            perror("send");
+	    	(void) event_del(ev);
+			free(ev);
+            (void) close(acc);
+        }
+#endif
+    }
+}
+
+
 void stdin_handler(int fd, short event, void *arg)
 {
 	int ret;
@@ -235,6 +282,21 @@ int main(int argc, char **argv)
 	
 	setbuf(stdin, NULL);
 	setbuf(stdout, NULL);
+
+	// receive response
+	ev_rcv = event_new(base,
+                soc,
+                EV_READ | EV_PERSIST,
+			    recv_handler, (void *)&data);
+	err = event_add(ev_rcv, NULL);
+	if(err != 0){
+		perror("event_add");
+		close(soc);
+        event_base_free(base);
+		exit(1);
+	}
+	// end
+
 	ev_io = event_new(base,
                 0 /* stdin */,
                 EV_READ | EV_PERSIST,
