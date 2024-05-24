@@ -10,6 +10,15 @@
 
 #include <getopt.h>
 
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
 //#include "common.h"
 //#include "recv_handler.h"
 
