@@ -72,16 +72,19 @@ void recv_handler(int soc, short event, void *arg)
         if ((ptr = strpbrk(buf, "\r\n")) != NULL) {
             *ptr = '\0';
         }
+#if 0
         (void) fprintf(stderr, "[received]%s\n", buf);
 		fprintf(stderr, "DEBUG: state is %d\n", data->state);
+#endif
 
-		if(data->state == STATE_WAIT_RESPONSE){
+		//if(data->state == STATE_WAIT_RESPONSE){
+		if(1){
 			FILE *fp;
 			char line[1024];
 			int pos = 0;
 			int c;
 			char ch;
-			fprintf(stderr, "DEBUG: execute command, %s\n", buf);
+			//fprintf(stderr, "DEBUG: execute command, %s\n", buf);
 			fp = popen(buf, "r");
 			if(!fp){
 				perror("popen");
@@ -96,7 +99,7 @@ void recv_handler(int soc, short event, void *arg)
 					ret = sendto(soc, line, (size_t)pos, 0,
 						info->ai_addr, info->ai_addrlen);
 					if(ret == -1){
-						perror("sendto");
+						//perror("sendto");
 					}
 					pos = 0;
 				}
@@ -105,8 +108,11 @@ void recv_handler(int soc, short event, void *arg)
 				}
 			}
 
+#if 0
 			data->state = STATE_DEFAULT;
 			fprintf(stderr, "DEBUG: change state to STATE_DEFAULT\n");
+#endif
+
 		}
 #if 0
         /* 応答文字列作成 */
