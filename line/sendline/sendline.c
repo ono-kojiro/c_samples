@@ -1,0 +1,378 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include <signal.h>
+
+#include <unistd.h>
+
+#include <event.h>
+
+#include <getopt.h>
+
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
+#define STATE_DEFAULT 0
+#define STATE_WAIT_RESPONSE 1
+
+struct userdata {
+	int soc;
+	const char *host;
+	const char *port;
+	const char *multicast_addr;
+	struct addrinfo *info;
+	int state;
+};
+
+void sig_int_handler(int fd, short event, void *arg)
+{
+    struct event_base *base = (struct event_base *)arg;
+	fprintf(stdout, "\n");
+	event_base_loopexit(base, NULL);
+}
+
+/* 送受信ハンドラ */
+void recv_handler(int soc, short event, void *arg)
+{
+    char buf[512], *ptr;
+    ssize_t len;
+    /* event_set()の第５引数のデータをargで受け取れる */
+    //struct event *ev = (struct event*) arg;
+
+	struct userdata *data = (struct userdata *)arg;
+	//int soc = data->soc;
+    struct addrinfo *info = data->info;
+	int ret = 0;
+
+    /* イベントのタイプが読み込み可能だった */
+    if (event & EV_READ) {
+        /* 受信 */
+        if ((len = recv(soc, buf, sizeof(buf), 0)) == -1) {
+            /* エラー */
+            perror("recv");
+			close(soc);
+            return;
+        }
+
+        if (len == 0) {
+            /* エンド・オブ・ファイル */
+            (void) fprintf(stderr, "recv:EOF\n");
+			close(soc);
+            return;
+        }
+        /* 文字列化・表示 */
+        buf[len]='\0';
+        if ((ptr = strpbrk(buf, "\r\n")) != NULL) {
+            *ptr = '\0';
+        }
+        (void) fprintf(stderr, "[received]%s\n", buf);
+		fprintf(stderr, "DEBUG: state is %d\n", data->state);
+
+		if(data->state == STATE_WAIT_RESPONSE){
+			FILE *fp;
+			char line[1024];
+			int pos = 0;
+			int c;
+			char ch;
+			fprintf(stderr, "DEBUG: execute command, %s\n", buf);
+			fp = popen(buf, "r");
+			if(!fp){
+				perror("popen");
+				return;
+			}
+			while(1){
+				c = fgetc(fp);
+				ch = (char)c;
+				line[pos] = ch;
+				pos++;
+				if(pos >= 1024 || c == EOF){
+					ret = sendto(soc, line, (size_t)pos, 0,
+						info->ai_addr, info->ai_addrlen);
+					if(ret == -1){
+						perror("sendto");
+					}
+					pos = 0;
+				}
+				if(c == EOF){
+					break;
+				}
+			}
+
+			data->state = STATE_DEFAULT;
+			fprintf(stderr, "DEBUG: change state to STATE_DEFAULT\n");
+		}
+#if 0
+        /* 応答文字列作成 */
+        (void) mystrlcat(buf, ":OK\r\n", sizeof(buf));
+        len = (ssize_t) strlen(buf);
+        /* 応答 */
+        if ((len = send(acc, buf, (size_t) len, 0)) == -1) {
+            /* エラー */
+            perror("send");
+	    	(void) event_del(ev);
+			free(ev);
+            (void) close(acc);
+        }
+#endif
+    }
+}
+
+
+void stdin_handler(int fd, short event, void *arg)
+{
+	int ret;
+
+	struct userdata *data = (struct userdata *)arg;
+	int soc = data->soc;
+	const char *host = data->host;
+	const char *port = data->port;
+	const char *multicast_addr = data->multicast_addr;
+    struct addrinfo *info = data->info;
+	
+	char buf[256];
+	int len;
+
+	int err;
+	int i;
+
+	struct sockaddr_storage dst;
+	socklen_t dst_len;
+
+	if(event & EV_READ){
+		memset(buf, 0, sizeof(buf) * 1);
+		len = read(fd, buf, sizeof(buf) - 1);
+		if(len == -1){
+			perror("read error");
+		}
+		else if(len == 0){
+			fprintf(stderr, "DEBUG: pressed Ctrl+D\n");
+			// Ctrl+D
+		}
+		else{
+			fprintf(stderr, "DEBUG: send '%.*s'\n", (int)(strlen(buf) - 1), buf);
+			fprintf(stderr, "DEBUG: buf = { ");
+			for(i = 0; i < strlen(buf); i++){
+				fprintf(stderr, "%02X, ", buf[i]);
+			}	
+			fprintf(stderr, "}\n");
+			ret = sendto(soc, buf, len, 0,
+					info->ai_addr, info->ai_addrlen);
+			if(ret == -1){
+				perror("sendto");
+				event_loopexit(NULL);
+			}
+
+			if(!strcmp("startcmd\n", buf)){
+				data->state = STATE_WAIT_RESPONSE;
+				fprintf(stderr, "DEBUG: change state to STATE_WAIT_RESPONSE\n");
+			}
+	
+			fprintf(stdout, "> ");
+		}
+	}
+}
+
+int get_addr_info(const char *host, const char *port,
+            struct addrinfo **info)
+{
+    int err;
+    struct addrinfo hints;
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_INET;
+    hints.ai_socktype = SOCK_DGRAM;
+
+    err = getaddrinfo(host, port, &hints, info);
+    if(err != 0){
+        fprintf(stderr, "getaddrinfo():%s\n", gai_strerror(err));
+        return -1;
+    }
+
+    return 0;
+}
+
+int print_name_info(struct addrinfo *info)
+{
+    int err;
+    char host[NI_MAXHOST];
+    char service[NI_MAXSERV];
+
+    err = getnameinfo(
+            info->ai_addr, info->ai_addrlen,
+            host,    NI_MAXHOST,
+            service, NI_MAXSERV,
+            NI_NUMERICHOST | NI_NUMERICSERV);
+
+    if(err != 0){
+        fprintf(stderr, "getnameinfo():%s\n", gai_strerror(err));
+        exit(1);
+    }
+
+    fprintf(stderr, "host=%s, service=%s\n", host, service);
+
+    return 0;
+}
+
+int main(int argc, char **argv)
+{
+	int ret = 0;
+
+	int soc;
+
+    struct event_base *base;
+	struct event *ev_rcv;
+    struct event *ev_int;
+	struct event *ev_io;
+
+	struct option options[] = {
+		{ "host", required_argument, 0, 'h' },
+		{ "port"    , required_argument, 0, 'p' },
+		{ "multicast-address", required_argument, 0, 'm' },
+		{ 0, 0, 0, 0 }
+	};
+
+	const char *host = NULL;
+	const char *port = NULL;
+
+	const char *multicast_addr = NULL;
+    struct addrinfo *info;
+	unsigned char multicast_ttl = 64;
+	unsigned char multicast_loopback = 1;
+
+	struct userdata data;
+
+	int err;
+
+	int c, index;
+	while(1){
+		c = getopt_long(argc, argv, "h:p:m:", options, &index);
+		if(c == -1){
+			break;
+		}
+
+		switch(c){
+			case 'h' :
+				host = optarg;
+				break;
+			case 'p' :
+				port = optarg;
+				break;
+			case 'm' :
+				multicast_addr = optarg;
+				break;
+			default :
+				break;
+		}
+	}
+
+	if(host == NULL){
+		fprintf(stderr, "no host option\n");
+		ret++;
+	}
+
+	if(port == NULL){
+		fprintf(stderr, "no port option\n");
+		ret++;
+	}
+
+#if 0
+	if(multicast_addr == NULL){
+		fprintf(stderr, "no multicast-address option\n");
+		ret++;
+	}
+#endif
+
+	if(ret){
+		exit(1);
+	}
+
+	memset((void *)&data, 0, sizeof(struct userdata) * 1);
+	data.state = STATE_DEFAULT;
+
+	base = event_base_new();
+	ev_int = evsignal_new(base, SIGINT, sig_int_handler, (void *)base);
+	signal_add(ev_int, NULL);
+
+    ret = get_addr_info(host, port, &info);
+    if(ret != 0){
+        exit(1);
+    }
+    print_name_info(info);
+
+    data.info = info;
+
+    soc = socket(info->ai_family, info->ai_socktype, info->ai_protocol);
+	if(soc == -1){
+		perror("socket");
+		freeaddrinfo(info);
+		return -1;
+	}
+	
+    err = setsockopt(soc, IPPROTO_IP, IP_MULTICAST_TTL,
+					&multicast_ttl, sizeof(multicast_ttl));
+	if(err == -1){
+		perror("setsockopt");
+		freeaddrinfo(info);
+		close(soc);
+		return -1;
+	}
+
+	err = setsockopt(soc, IPPROTO_IP, IP_MULTICAST_LOOP,
+					&multicast_loopback, sizeof(multicast_loopback));
+	if(err == -1){
+		perror("setsockopt");
+		freeaddrinfo(info);
+		close(soc);
+		return -1;
+	}
+
+
+	data.soc = soc;
+	data.host = host;
+	data.port = port;
+	data.multicast_addr = multicast_addr;
+	
+	setbuf(stdin, NULL);
+	setbuf(stdout, NULL);
+
+	// receive response
+	ev_rcv = event_new(base,
+                soc,
+                EV_READ | EV_PERSIST,
+			    recv_handler, (void *)&data);
+	err = event_add(ev_rcv, NULL);
+	if(err != 0){
+		perror("event_add");
+		close(soc);
+        event_base_free(base);
+		exit(1);
+	}
+	// end
+
+	ev_io = event_new(base,
+                0 /* stdin */,
+                EV_READ | EV_PERSIST,
+			    stdin_handler, (void *)&data);
+	err = event_add(ev_io, NULL);
+	if(err != 0){
+		perror("event_add");
+		close(soc);
+        event_base_free(base);
+		exit(1);
+	}
+	fprintf(stdout, "> ");
+
+	event_base_dispatch(base);
+	fprintf(stderr, "END\n");
+    event_base_free(base);
+    freeaddrinfo(info);
+	return 0;
+}
+
+
