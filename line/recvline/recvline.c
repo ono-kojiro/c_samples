@@ -222,41 +222,14 @@ void recv_handler(int soc, short event, void *arg)
 			}
 		}
 
-		if(b_reqcmd){
-			memcpy((void *)&data->info, &info, 1 * sizeof(struct sockaddr_storage));
-			data->info_len = info_len;
-			fprintf(stderr, "DEBUG: change state to COMMAND mode\n");
-			fprintf(stderr, "DEBUG: please enter command.\n");
-			fprintf(stderr, "> ");
-			data->state = STATE_SENDCMD;
-			//fprintf(stderr, "DEBUG: send 'ls -l' and wait.\n");
-			//sprintf(cmd, "ls -l\n");
-			
-#if 0		
-			ret = sendto(soc, cmd, (size_t)strlen(cmd), 0, 
-			(struct sockaddr *)&info, info_len);
-			if(ret == -1)
-			{
-				perror("sendto failed");
-			}
-
-			data->state = STATE_WAIT;
-#endif
-		}
+		memcpy((void *)&data->info, &info, 1 * sizeof(struct sockaddr_storage));
+		data->info_len = info_len;
+        data->soc      = soc;
 		
 		memmove((void *)data->lines, (const void *)pos, strlen(pos));
 		lines_len = strlen(pos);
 		data->lines[lines_len] = '\0';
 
-#if 0
-        /* 文字列化・表示 */
-        buf[len]='\0';
-        if ((ptr = strpbrk(buf, "\r\n")) != NULL) {
-            *ptr = '\0';
-        }
-        (void) fprintf(stderr, "[recvfrom] %s\n", buf);
-#endif
-	
 		if(!strcmp(buf, "shutdown")){
 			fprintf(stderr, "shutdown server\n");
 			event_del(ev);
@@ -265,37 +238,6 @@ void recv_handler(int soc, short event, void *arg)
 			event_loopexit(NULL);
 			return;
 		}
-
-#if 0
-		if(!strcmp("command?", buf)){
-        	(void)sprintf(buf, "ls\r\n");
-        	if ((len = sendto(soc, buf, (size_t)strlen(buf), 0, 
-				(struct sockaddr *)&info, info_len)) == -1)
-			{
-            	/* エラー */
-            	perror("sendto failed");
-	    		(void) event_del(ev);
-            	(void) close(soc);
-			}
-			data->state = STATE_WAIT_RESPONSE;
-			return;
-        }
-#endif
-
-#if 0
-        /* 応答文字列作成 */
-        (void) mystrlcat(buf, ":OK\r\n", sizeof(buf));
-        buf_len = (ssize_t) strlen(buf);
-        /* 応答 */
-        if ((buf_len = sendto(soc, buf, (size_t) buf_len, 0, 
-						(struct sockaddr *)&info, info_len)) == -1) {
-            /* エラー */
-            perror("sendto");
-	    	(void) event_del(ev);
-	    	//free(ev);
-            (void) close(soc);
-        }
-#endif
     }
 }
 
@@ -331,17 +273,16 @@ void stdin_handler(int fd, short event, void *arg)
 			buf[len] = '\0';
 		}
 
-		fprintf(stderr, "[receiver] read '%s'\n", buf);
-
-		if(data->state == STATE_SENDCMD){
-			ret = sendto(soc, buf, (size_t)strlen(buf), 0, 
-			(const struct sockaddr *)&data->info, data->info_len);
+		fprintf(stderr, "[stdin] read '%s'\n", buf);
+        fprintf(stderr, "DEBUG: len is %d\n", len);
+        fprintf(stderr, "DEBUG: soc is %d\n", soc);
+        if(soc && data->info_len != 0){
+			ret = sendto(soc, buf, len, 0, 
+			    (const struct sockaddr *)&data->info, data->info_len);
 			if(ret == -1)
 			{
 				perror("sendto failed");
 			}
-			
-			data->state = STATE_WAITRES;
 		}
 
 		if(!strcmp(buf, "exit")){
@@ -376,7 +317,7 @@ int main(int argc, char **argv)
 	const char *port = NULL;
 	const char *multicast_address = NULL;
 
-	int soc;
+	int soc = 0;
 
 	int err;
 
