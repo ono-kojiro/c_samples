@@ -12,6 +12,9 @@ test :
 start :
 	$(top_builddir)/myserver -p 1234
 
+debug :
+	$(top_builddir)/myserver -p 1234 -F
+
 stop :
 	-pkill myserver
 

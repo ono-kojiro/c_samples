@@ -21,6 +21,9 @@
 /* for O_RDWR */
 #include <fcntl.h>
 
+#include <arpa/inet.h>
+#include <netinet/in.h>
+
 #define MAXFD 64
 
 #include <getopt.h>
@@ -28,26 +31,63 @@
 #include <event2/event.h>
 #include <event2/bufferevent.h>
 
+struct userdata {
+    char ip_str[INET6_ADDRSTRLEN];
+    int  port;
+};
+
+void get_addr_and_port(struct sockaddr *sa, char *ip_str, int *port)
+{
+    //char ip_str[INET6_ADDRSTRLEN];
+    if(sa->sa_family == AF_INET){
+        // IPv4
+        struct sockaddr_in *sa_in = (struct sockaddr_in *)sa;
+        inet_ntop(AF_INET, &(sa_in->sin_addr), ip_str, INET_ADDRSTRLEN);
+        *port = ntohs(sa_in->sin_port);
+    }
+    else if(sa->sa_family == AF_INET6){
+        // IPv6
+        struct sockaddr_in6 *sa_in6 = (struct sockaddr_in6 *)sa;
+        inet_ntop(AF_INET6, &(sa_in6->sin6_addr), ip_str, INET6_ADDRSTRLEN);
+        *port = ntohs(sa_in6->sin6_port);
+    }
+    else {
+        strcpy(ip_str, "Unknown AF");
+        *port = -1;
+    }
+}
+
 void read_cb(struct bufferevent *bev, void *ctx)
 {
     char buffer[256];
+    struct userdata *data = (struct userdata *)ctx;
     int n;
     while(1){
         n = bufferevent_read(bev, buffer, sizeof(buffer));
         if(n <= 0){
             break;
         }
-        printf("Received: %s\n", buffer);
+        printf("Received from %s:%d: %s\n", data->ip_str, data->port, buffer);
         bufferevent_write(bev, buffer, n); // echo back
     }
 }
 
-void event_cb(struct bufferevent *bev, short event, void *ctx)
+void event_cb(struct bufferevent *bev, short events, void *ctx)
 {
-    if(event & BEV_EVENT_ERROR){
-        perror("error from bufferevent");
+    struct userdata *data = (struct userdata *)ctx;
+    int finished = 0;
+
+    if(events & (BEV_EVENT_EOF)){
+        bufferevent_free(bev);
+        finished = 1;
     }
-    if(event & (BEV_EVENT_EOF | BEV_EVENT_ERROR)){
+    if(events & BEV_EVENT_ERROR){
+        perror("error from bufferevent");
+        finished = 1;
+    }
+
+    if(finished){
+        free(data);
         bufferevent_free(bev);
     }
 }
@@ -58,6 +98,12 @@ void accept_cb(evutil_socket_t soc, short event, void *arg)
     struct sockaddr_in sin;
     struct bufferevent *bev;
     int fd;
+    
+    char ip_str[INET6_ADDRSTRLEN];
+    int port = 0;
+
+    struct userdata *data = NULL;
+    data = (struct userdata *)malloc(1 * sizeof(struct userdata));
 
     socklen_t slen = sizeof(sin);
     fd = accept(soc, (struct sockaddr*)&sin, &slen);
@@ -66,8 +112,13 @@ void accept_cb(evutil_socket_t soc, short event, void *arg)
         return;
     }
 
+    get_addr_and_port((struct sockaddr *)&sin, ip_str, &port);
+    fprintf(stderr, "DEBUG: accept from %s:%d\n", ip_str, port);
+    strcpy(data->ip_str, ip_str);
+    data->port = port;
+
     bev = bufferevent_socket_new(base, fd, BEV_OPT_CLOSE_ON_FREE);
-    bufferevent_setcb(bev, read_cb, NULL, event_cb, NULL);
+    bufferevent_setcb(bev, read_cb, NULL, event_cb, (void *)data);
     bufferevent_enable(bev, EV_READ | EV_WRITE);
 }
 
