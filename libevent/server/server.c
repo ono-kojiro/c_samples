@@ -78,11 +78,11 @@ void event_cb(struct bufferevent *bev, short events, void *ctx)
     int finished = 0;
 
     if(events & (BEV_EVENT_EOF)){
-        bufferevent_free(bev);
+        perror("BEV_EVENT_EOF");
         finished = 1;
     }
     if(events & BEV_EVENT_ERROR){
-        perror("error from bufferevent");
+        perror("BEV_EVENT_ERROR");
         finished = 1;
     }
 
