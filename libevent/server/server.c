@@ -62,12 +62,80 @@ void read_cb(struct bufferevent *bev, void *ctx)
     char buffer[256];
     struct userdata *data = (struct userdata *)ctx;
     int n;
+    int i, tmp;
+    int cr, lf;
+    int has_null;
+    int len_ctrl;
     while(1){
+        memset(buffer, 0, sizeof(buffer));
         n = bufferevent_read(bev, buffer, sizeof(buffer));
         if(n <= 0){
             break;
         }
-        printf("Received from %s:%d: %s", data->ip_str, data->port, buffer);
+        
+        printf("DEBUB: from %s:%d, %s", data->ip_str, data->port, buffer);
+        
+        has_null = 0;
+        if(strlen(buffer) != n){
+            has_null = 1;
+        }
+
+        cr = 0;
+        lf = 0;
+        {
+            char *p;
+            while(1){
+                p = strchr(buffer, '\n');
+                if(!p){
+                    break;
+                }
+                memmove(p, p + 1, strlen(p));
+                lf++;
+            }
+            while(1){
+                p = strchr(buffer, '\r');
+                if(!p){
+                    break;
+                }
+                memmove(p, p + 1, strlen(p));
+                cr++;
+            }
+        }
+
+        /*
+            n: 8
+            cr: 1
+            lf: 1
+            has_null: 1
+
+ 
+              0   1   2   3   4   5   6   7
+            +---+---+---+---+---+---+---+---+
+            | a | b | c | d | e |\r |\n |\0 |
+            +---+---+---+---+---+---+---+---+
+            
+              ^               ^
+              |      swap     |
+              +---------------+
+        */
+
+        len_ctrl = cr + lf + has_null; // ex. 3
+
+        for(i = 0; i < (n - len_ctrl) / 2; i++){
+            tmp = buffer[i];
+            buffer[i] = buffer[n - 1 - len_ctrl - i];
+            buffer[n - 1 - len_ctrl - i] = tmp;
+        }
+
+        if(cr){
+            buffer[strlen(buffer)] = '\r';
+            buffer[strlen(buffer) + 1] = '\0';
+        }
+        if(lf){
+            buffer[strlen(buffer)] = '\n';
+            buffer[strlen(buffer) + 1] = '\0';
+        }
+        
         bufferevent_write(bev, buffer, n); // echo back
     }
 }
