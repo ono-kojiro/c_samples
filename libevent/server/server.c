@@ -67,7 +67,7 @@ void read_cb(struct bufferevent *bev, void *ctx)
         if(n <= 0){
             break;
         }
-        printf("Received from %s:%d: %s\n", data->ip_str, data->port, buffer);
+        printf("Received from %s:%d: %s", data->ip_str, data->port, buffer);
         bufferevent_write(bev, buffer, n); // echo back
     }
 }
