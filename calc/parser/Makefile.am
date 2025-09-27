@@ -10,11 +10,12 @@ BUILT_SOURCES = parser.c parser.h
 libparser_la_SOURCES = parser.c userdata.c
 
 parser.h : parser.c token.h $(MAKEHEADERS)
-	echo '#include "token.h"' > $@
-	echo '#include "userdata.h"' >> $@
-	$(MAKEHEADERS) -h $< >> $@
+	echo '#include "macro.h"' > parser.h
+	echo '#include "token.h"' >> parser.h
+	echo '#include "userdata.h"' >> parser.h
+	$(MAKEHEADERS) -h parser.c >> parser.h
 
 parser.c : parser.y $(LEMON)
-	$(LEMON) T=$(top_builddir)/tools/lempar.c -m -q $<
+	$(LEMON) T=$(top_builddir)/tools/lempar.c -m -q parser.y
 
 

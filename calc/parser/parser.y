@@ -12,8 +12,9 @@
 #include <stdio.h>
 #include <assert.h>
 #include <math.h>
-#include "token.h"
 
+#include "macro.h"
+#include "token.h"
 #include "userdata.h"
 
 /* #include "parser.h" */
