@@ -16,6 +16,14 @@
 %token	ALIGNAS ALIGNOF ATOMIC GENERIC NORETURN STATIC_ASSERT THREAD_LOCAL
 
 %start translation_unit
+
+%{
+#include <stdio.h>
+
+int yylex(void);
+void yyerror(const char *s);
+%}
+
 %%
 
 primary_expression
@@ -525,7 +533,6 @@ declaration_list
 	;
 
 %%
-#include <stdio.h>
 
 void yyerror(const char *s)
 {
